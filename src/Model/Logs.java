@@ -46,10 +46,10 @@ public class Logs {
         try {
             this.timestamp = new Timestamp(dateformat.parse(timestamp).getTime());
         } catch (ParseException ex) {
-            ex.printStackTrace();
+            System.out.println("Logs timestamp parse error: " + ex.getMessage());
         }
     }
-    
+
     public int getId() {
         return id;
     }

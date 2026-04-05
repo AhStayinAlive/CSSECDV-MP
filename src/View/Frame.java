@@ -1,12 +1,14 @@
 package View;
 
 import Controller.Main;
-import java.awt.BorderLayout;
+import Model.User;
 import java.awt.CardLayout;
-import java.awt.Dimension;
 import javax.swing.WindowConstants;
 
 public class Frame extends javax.swing.JFrame {
+
+    /** The user currently logged in. Set by Login on success; cleared on logout. */
+    public User sessionUser = null;
 
     public Frame() {
         initComponents();
@@ -200,63 +202,99 @@ public class Frame extends javax.swing.JFrame {
     }//GEN-LAST:event_clientBtnActionPerformed
 
     private void logoutBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logoutBtnActionPerformed
+        sessionUser = null;
         frameView.show(Container, "loginPnl");
     }//GEN-LAST:event_logoutBtnActionPerformed
 
     public Main main;
-    public Login loginPnl = new Login();
+    public Login loginPnl   = new Login();
     public Register registerPnl = new Register();
-    
-    private AdminHome adminHomePnl = new AdminHome();
+
+    private AdminHome   adminHomePnl   = new AdminHome();
     private ManagerHome managerHomePnl = new ManagerHome();
-    private StaffHome staffHomePnl = new StaffHome();
-    private ClientHome clientHomePnl = new ClientHome();
-    
+    private StaffHome   staffHomePnl   = new StaffHome();
+    private ClientHome  clientHomePnl  = new ClientHome();
+
     private CardLayout contentView = new CardLayout();
-    private CardLayout frameView = new CardLayout();
-    
-    public void init(Main controller){
+    private CardLayout frameView   = new CardLayout();
+
+    public void init(Main controller) {
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setTitle("CSSECDV - SECURITY Svcs");
         this.setLocationRelativeTo(null);
-        
+
         this.main = controller;
-        loginPnl.frame = this;
+        loginPnl.frame    = this;
         registerPnl.frame = this;
-        
-        adminHomePnl.init(main.sqlite);
-        clientHomePnl.init(main.sqlite);
-        managerHomePnl.init(main.sqlite);
-        staffHomePnl.init(main.sqlite);
-        
+
+        // Pass 'this' so each home panel can thread Frame to MgmtUser for re-auth
+        adminHomePnl.init(main.sqlite, this);
+        clientHomePnl.init(main.sqlite, this);
+        managerHomePnl.init(main.sqlite, this);
+        staffHomePnl.init(main.sqlite, this);
+
         Container.setLayout(frameView);
-        Container.add(loginPnl, "loginPnl");
+        Container.add(loginPnl,    "loginPnl");
         Container.add(registerPnl, "registerPnl");
-        Container.add(HomePnl, "homePnl");
+        Container.add(HomePnl,     "homePnl");
         frameView.show(Container, "loginPnl");
-        
+
         Content.setLayout(contentView);
-        Content.add(adminHomePnl, "adminHomePnl");
+        Content.add(adminHomePnl,   "adminHomePnl");
         Content.add(managerHomePnl, "managerHomePnl");
-        Content.add(staffHomePnl, "staffHomePnl");
-        Content.add(clientHomePnl, "clientHomePnl");
-        
+        Content.add(staffHomePnl,   "staffHomePnl");
+        Content.add(clientHomePnl,  "clientHomePnl");
+
         this.setVisible(true);
     }
-    
-    public void mainNav(){
+
+    /**
+     * Called after successful login.  Routes to the correct role panel, updates
+     * the last-login display with the PREVIOUS session's values, then records
+     * the current timestamp in the DB.
+     *
+     * @param user           the authenticated User object (role, username, etc.)
+     * @param prevTimestamp  last_login_timestamp value that was in DB before this login
+     * @param prevStatus     last_login_status value that was in DB before this login
+     */
+    public void mainNav(User user, String prevTimestamp, String prevStatus) {
+        sessionUser = user;
         frameView.show(Container, "homePnl");
+
+        int role = user.getRole();
+        if (role == 5) {                          // Administrator
+            adminHomePnl.updateLastLogin(prevTimestamp, prevStatus);
+            adminHomePnl.showPnl("home");
+            contentView.show(Content, "adminHomePnl");
+        } else if (role == 4) {                   // Manager
+            managerHomePnl.updateLastLogin(prevTimestamp, prevStatus);
+            managerHomePnl.showPnl("home");
+            contentView.show(Content, "managerHomePnl");
+        } else if (role == 3) {                   // Staff
+            staffHomePnl.updateLastLogin(prevTimestamp, prevStatus);
+            staffHomePnl.showPnl("home");
+            contentView.show(Content, "staffHomePnl");
+        } else {                                   // Client (role == 2) or other
+            clientHomePnl.updateLastLogin(prevTimestamp, prevStatus);
+            clientHomePnl.showPnl("home");
+            contentView.show(Content, "clientHomePnl");
+        }
     }
-    
-    public void loginNav(){
+
+    public void loginNav() {
         frameView.show(Container, "loginPnl");
     }
-    
-    public void registerNav(){
+
+    public void registerNav() {
         frameView.show(Container, "registerPnl");
     }
-    
-    public void registerAction(String username, String password, String confpass){
+
+    /**
+     * Creates the account.  All validation (policy, uniqueness, confirm-match)
+     * is done in Register.java before this is called.
+     * Password is BCrypt-hashed inside SQLite.addUser().
+     */
+    public void registerAction(String username, String password) {
         main.sqlite.addUser(username, password);
     }
 
