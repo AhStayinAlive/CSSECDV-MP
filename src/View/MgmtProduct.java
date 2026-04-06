@@ -7,9 +7,10 @@ package View;
 
 import Controller.SQLite;
 import Model.Product;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
@@ -21,18 +22,16 @@ public class MgmtProduct extends javax.swing.JPanel {
 
     public SQLite sqlite;
     public DefaultTableModel tableModel;
+    public Frame frame;
+    private static final DateTimeFormatter TS_FMT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     
-    public MgmtProduct(SQLite sqlite) {
+    public MgmtProduct(SQLite sqlite, Frame frame) {
         initComponents();
         this.sqlite = sqlite;
+        this.frame = frame;
         tableModel = (DefaultTableModel)table.getModel();
         table.getTableHeader().setFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, 14));
-
-//        UNCOMMENT TO DISABLE BUTTONS
-//        purchaseBtn.setVisible(false);
-//        addBtn.setVisible(false);
-//        editBtn.setVisible(false);
-//        deleteBtn.setVisible(false);
     }
 
     public void init(){
@@ -49,6 +48,7 @@ public class MgmtProduct extends javax.swing.JPanel {
                 products.get(nCtr).getStock(), 
                 products.get(nCtr).getPrice()});
         }
+        configureRoleButtons();
     }
     
     public void designer(JTextField component, String text){
@@ -186,6 +186,10 @@ public class MgmtProduct extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void purchaseBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_purchaseBtnActionPerformed
+        if (!canPurchase()) {
+            JOptionPane.showMessageDialog(this, "Only clients can purchase products.", "Access Denied", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         if(table.getSelectedRow() >= 0){
             JTextField stockFld = new JTextField("0");
             designer(stockFld, "PRODUCT STOCK");
@@ -206,12 +210,27 @@ public class MgmtProduct extends javax.swing.JPanel {
                     JOptionPane.showMessageDialog(this, "Invalid Quantity. You must enter a positive whole number greater than 0.", "Validation Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                System.out.println("Validated Purchase Quantity: " + quantity);
+                String productName = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
+                boolean purchased = sqlite.purchaseProduct(productName, quantity);
+                if (!purchased) {
+                    JOptionPane.showMessageDialog(this, "Purchase failed. Product may be out of stock.", "Purchase Failed", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                String username = frame.sessionUser.getUsername();
+                String ts = LocalDateTime.now().format(TS_FMT);
+                sqlite.addHistory(username, productName, quantity, ts);
+                sqlite.addLogs("NOTICE", username, "Purchased " + quantity + " x " + productName, ts);
+                JOptionPane.showMessageDialog(this, "Purchase successful.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                init();
             }
         }
     }//GEN-LAST:event_purchaseBtnActionPerformed
 
     private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
+        if (!canManageProducts()) {
+            JOptionPane.showMessageDialog(this, "Only staff and managers can manage products.", "Access Denied", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         JTextField nameFld = new JTextField();
         JTextField stockFld = new JTextField();
         JTextField priceFld = new JTextField();
@@ -250,13 +269,19 @@ public class MgmtProduct extends javax.swing.JPanel {
 
             // Data is safe, send to database
             sqlite.addProduct(name, stock, price);
+            logAction("Added product " + name);
             init(); // Refresh table
         }
     }//GEN-LAST:event_addBtnActionPerformed
 
     private void editBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editBtnActionPerformed
+        if (!canManageProducts()) {
+            JOptionPane.showMessageDialog(this, "Only staff and managers can manage products.", "Access Denied", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         if(table.getSelectedRow() >= 0){
-            JTextField nameFld = new JTextField(tableModel.getValueAt(table.getSelectedRow(), 0) + "");
+            String oldName = tableModel.getValueAt(table.getSelectedRow(), 0) + "";
+            JTextField nameFld = new JTextField(oldName);
             JTextField stockFld = new JTextField(tableModel.getValueAt(table.getSelectedRow(), 1) + "");
             JTextField priceFld = new JTextField(tableModel.getValueAt(table.getSelectedRow(), 2) + "");
 
@@ -291,23 +316,54 @@ public class MgmtProduct extends javax.swing.JPanel {
                     JOptionPane.showMessageDialog(this, "Invalid Input. Stock must be a whole number and Price must be a valid positive amount.", "Validation Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                // ------------------------------------------
-
-                // (Note: To make edit fully work, Person 3's job is done here, but you'll need an updateProduct method in SQLite.java eventually!)
-                System.out.println("Validated Edit: " + name + ", " + stock + ", " + price);
+                sqlite.updateProduct(oldName, name, stock, price);
+                logAction("Edited product " + oldName + " to " + name);
+                init();
             }
         }
     }//GEN-LAST:event_editBtnActionPerformed
 
     private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
+        if (!canManageProducts()) {
+            JOptionPane.showMessageDialog(this, "Only staff and managers can manage products.", "Access Denied", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         if(table.getSelectedRow() >= 0){
             int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete " + tableModel.getValueAt(table.getSelectedRow(), 0) + "?", "DELETE PRODUCT", JOptionPane.YES_NO_OPTION);
             
             if (result == JOptionPane.YES_OPTION) {
-                System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
+                String productName = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
+                sqlite.removeProduct(productName);
+                logAction("Deleted product " + productName);
+                init();
             }
         }
     }//GEN-LAST:event_deleteBtnActionPerformed
+
+    private boolean canPurchase() {
+        return frame != null && frame.sessionUser != null
+                && frame.sessionUser.getRole() == Frame.ROLE_CLIENT;
+    }
+
+    private boolean canManageProducts() {
+        if (frame == null || frame.sessionUser == null) return false;
+        int role = frame.sessionUser.getRole();
+        return role == Frame.ROLE_STAFF || role == Frame.ROLE_MANAGER;
+    }
+
+    private void configureRoleButtons() {
+        purchaseBtn.setVisible(canPurchase());
+        boolean canManage = canManageProducts();
+        addBtn.setVisible(canManage);
+        editBtn.setVisible(canManage);
+        deleteBtn.setVisible(canManage);
+    }
+
+    private void logAction(String description) {
+        if (frame == null || frame.sessionUser == null) return;
+        sqlite.addLogs("NOTICE", frame.sessionUser.getUsername(), description,
+                LocalDateTime.now().format(TS_FMT));
+    }
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

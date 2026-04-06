@@ -12,6 +12,7 @@ public class AdminHome extends javax.swing.JPanel {
     public MgmtUser    mgmtUser;
 
     private Home home;
+    private Frame frame;
     private CardLayout contentView = new CardLayout();
 
     public AdminHome() {
@@ -19,9 +20,10 @@ public class AdminHome extends javax.swing.JPanel {
     }
 
     public void init(SQLite sqlite, Frame frame) {
-        mgmtHistory = new MgmtHistory(sqlite);
-        mgmtLogs    = new MgmtLogs(sqlite);
-        mgmtProduct = new MgmtProduct(sqlite);
+        this.frame = frame;
+        mgmtHistory = new MgmtHistory(sqlite, frame);
+        mgmtLogs    = new MgmtLogs(sqlite, frame);
+        mgmtProduct = new MgmtProduct(sqlite, frame);
         mgmtUser    = new MgmtUser(sqlite, frame);
 
         home = new Home("WELCOME ADMIN!", new java.awt.Color(51, 153, 255));
@@ -32,6 +34,7 @@ public class AdminHome extends javax.swing.JPanel {
         Content.add(this.mgmtHistory,"mgmtHistory");
         Content.add(this.mgmtProduct,"mgmtProduct");
         Content.add(this.mgmtLogs,   "mgmtLogs");
+        configureRoleView();
     }
 
     /** Delegates to the Home panel to show the previous session's last-login info. */
@@ -43,6 +46,13 @@ public class AdminHome extends javax.swing.JPanel {
 
     public void showPnl(String panelName) {
         contentView.show(Content, panelName);
+    }
+
+    private void configureRoleView() {
+        usersBtn.setVisible(true);
+        logsBtn.setVisible(true);
+        productsBtn.setVisible(false);
+        historyBtn.setVisible(false);
     }
 
     @SuppressWarnings("unchecked")
@@ -140,6 +150,7 @@ public class AdminHome extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void usersBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_usersBtnActionPerformed
+        if (!isAdmin()) return;
         mgmtUser.init();
         usersBtn.setForeground(Color.red);
         productsBtn.setForeground(Color.black);
@@ -149,6 +160,7 @@ public class AdminHome extends javax.swing.JPanel {
     }//GEN-LAST:event_usersBtnActionPerformed
 
     private void productsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productsBtnActionPerformed
+        if (!isAdmin()) return;
         mgmtProduct.init();
         usersBtn.setForeground(Color.black);
         productsBtn.setForeground(Color.red);
@@ -158,6 +170,7 @@ public class AdminHome extends javax.swing.JPanel {
     }//GEN-LAST:event_productsBtnActionPerformed
 
     private void historyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_historyBtnActionPerformed
+        if (!isAdmin()) return;
         mgmtHistory.init();
         usersBtn.setForeground(Color.black);
         productsBtn.setForeground(Color.black);
@@ -167,6 +180,7 @@ public class AdminHome extends javax.swing.JPanel {
     }//GEN-LAST:event_historyBtnActionPerformed
 
     private void logsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logsBtnActionPerformed
+        if (!isAdmin()) return;
         mgmtLogs.init();
         usersBtn.setForeground(Color.black);
         productsBtn.setForeground(Color.black);
@@ -174,6 +188,11 @@ public class AdminHome extends javax.swing.JPanel {
         logsBtn.setForeground(Color.red);
         contentView.show(Content, "mgmtLogs");
     }//GEN-LAST:event_logsBtnActionPerformed
+
+    private boolean isAdmin() {
+        return frame != null && frame.sessionUser != null
+                && frame.sessionUser.getRole() == Frame.ROLE_ADMIN;
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel Content;

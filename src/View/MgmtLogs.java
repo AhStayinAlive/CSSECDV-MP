@@ -18,19 +18,24 @@ public class MgmtLogs extends javax.swing.JPanel {
 
     public SQLite sqlite;
     public DefaultTableModel tableModel;
+    public Frame frame;
     
-    public MgmtLogs(SQLite sqlite) {
+    public MgmtLogs(SQLite sqlite, Frame frame) {
         initComponents();
         this.sqlite = sqlite;
+        this.frame = frame;
         tableModel = (DefaultTableModel)table.getModel();
         table.getTableHeader().setFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, 14));
-        
-//        UNCOMMENT TO DISABLE BUTTONS
-//        clearBtn.setVisible(false);
-//        debugBtn.setVisible(false);
     }
 
     public void init(){
+        if (!isAdmin()) {
+            clearBtn.setVisible(false);
+            debugBtn.setVisible(false);
+            return;
+        }
+        clearBtn.setVisible(true);
+        debugBtn.setVisible(true);
         //      CLEAR TABLE
         for(int nCtr = tableModel.getRowCount(); nCtr > 0; nCtr--){
             tableModel.removeRow(0);
@@ -139,11 +144,17 @@ public class MgmtLogs extends javax.swing.JPanel {
     }//GEN-LAST:event_clearBtnActionPerformed
 
     private void debugBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_debugBtnActionPerformed
+        if (!isAdmin()) return;
         if(sqlite.DEBUG_MODE == 1)
             sqlite.DEBUG_MODE = 0;
         else
             sqlite.DEBUG_MODE = 1;
     }//GEN-LAST:event_debugBtnActionPerformed
+
+    private boolean isAdmin() {
+        return frame != null && frame.sessionUser != null
+                && frame.sessionUser.getRole() == Frame.ROLE_ADMIN;
+    }
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

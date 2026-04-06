@@ -12,6 +12,7 @@ public class ClientHome extends javax.swing.JPanel {
     public MgmtUser    mgmtUser;
 
     private Home home;
+    private Frame frame;
     private CardLayout contentView = new CardLayout();
 
     public ClientHome() {
@@ -19,9 +20,10 @@ public class ClientHome extends javax.swing.JPanel {
     }
 
     public void init(SQLite sqlite, Frame frame) {
-        mgmtHistory = new MgmtHistory(sqlite);
-        mgmtLogs    = new MgmtLogs(sqlite);
-        mgmtProduct = new MgmtProduct(sqlite);
+        this.frame = frame;
+        mgmtHistory = new MgmtHistory(sqlite, frame);
+        mgmtLogs    = new MgmtLogs(sqlite, frame);
+        mgmtProduct = new MgmtProduct(sqlite, frame);
         mgmtUser    = new MgmtUser(sqlite, frame);
 
         home = new Home("WELCOME CLIENT!", new java.awt.Color(255, 102, 51));
@@ -32,6 +34,7 @@ public class ClientHome extends javax.swing.JPanel {
         Content.add(mgmtHistory, "mgmtHistory");
         Content.add(mgmtProduct, "mgmtProduct");
         Content.add(mgmtLogs,    "mgmtLogs");
+        configureRoleView();
     }
 
     public void updateLastLogin(String lastLoginTimestamp, String lastLoginStatus) {
@@ -42,6 +45,13 @@ public class ClientHome extends javax.swing.JPanel {
 
     public void showPnl(String panelName) {
         contentView.show(Content, panelName);
+    }
+
+    private void configureRoleView() {
+        productsBtn.setVisible(true);
+        historyBtn.setVisible(true);
+        usersBtn.setVisible(false);
+        logsBtn.setVisible(false);
     }
 
     @SuppressWarnings("unchecked")
@@ -139,6 +149,7 @@ public class ClientHome extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void usersBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_usersBtnActionPerformed
+        if (!isClient()) return;
         mgmtUser.init();
         usersBtn.setForeground(Color.red); productsBtn.setForeground(Color.black);
         historyBtn.setForeground(Color.black); logsBtn.setForeground(Color.black);
@@ -146,6 +157,7 @@ public class ClientHome extends javax.swing.JPanel {
     }//GEN-LAST:event_usersBtnActionPerformed
 
     private void productsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productsBtnActionPerformed
+        if (!isClient()) return;
         mgmtProduct.init();
         usersBtn.setForeground(Color.black); productsBtn.setForeground(Color.red);
         historyBtn.setForeground(Color.black); logsBtn.setForeground(Color.black);
@@ -153,6 +165,7 @@ public class ClientHome extends javax.swing.JPanel {
     }//GEN-LAST:event_productsBtnActionPerformed
 
     private void historyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_historyBtnActionPerformed
+        if (!isClient()) return;
         mgmtHistory.init();
         usersBtn.setForeground(Color.black); productsBtn.setForeground(Color.black);
         historyBtn.setForeground(Color.red); logsBtn.setForeground(Color.black);
@@ -160,11 +173,17 @@ public class ClientHome extends javax.swing.JPanel {
     }//GEN-LAST:event_historyBtnActionPerformed
 
     private void logsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logsBtnActionPerformed
+        if (!isClient()) return;
         mgmtLogs.init();
         usersBtn.setForeground(Color.black); productsBtn.setForeground(Color.black);
         historyBtn.setForeground(Color.black); logsBtn.setForeground(Color.red);
         contentView.show(Content, "mgmtLogs");
     }//GEN-LAST:event_logsBtnActionPerformed
+
+    private boolean isClient() {
+        return frame != null && frame.sessionUser != null
+                && frame.sessionUser.getRole() == Frame.ROLE_CLIENT;
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel Content;

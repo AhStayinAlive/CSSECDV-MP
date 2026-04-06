@@ -275,6 +275,28 @@ public class SQLite {
         return histories;
     }
 
+    /** Returns purchase history for a single username only. */
+    public ArrayList<History> getHistoryByUsername(String username) {
+        String sql = "SELECT id, username, name, stock, timestamp FROM history WHERE username=?";
+        ArrayList<History> histories = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    histories.add(new History(rs.getInt("id"),
+                            rs.getString("username"),
+                            rs.getString("name"),
+                            rs.getInt("stock"),
+                            rs.getString("timestamp")));
+                }
+            }
+        } catch (Exception ex) {
+            System.out.println("getHistoryByUsername error: " + ex.getMessage());
+        }
+        return histories;
+    }
+
     public ArrayList<Logs> getLogs() {
         String sql = "SELECT id, event, username, desc, timestamp FROM logs";
         ArrayList<Logs> logs = new ArrayList<>();
@@ -468,6 +490,58 @@ public class SQLite {
         }
     }
 
+    /** Updates product details identified by oldName. */
+    public void updateProduct(String oldName, String newName, int stock, double price) {
+        String sql = "UPDATE product SET name=?, stock=?, price=? WHERE name=?";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, newName);
+            pstmt.setInt(2, stock);
+            pstmt.setDouble(3, price);
+            pstmt.setString(4, oldName);
+            pstmt.executeUpdate();
+        } catch (Exception ex) {
+            System.out.println("updateProduct error: " + ex.getMessage());
+        }
+    }
+
+    /**
+     * Attempts to purchase product quantity atomically.
+     * Returns true on success, false if product not found or insufficient stock.
+     */
+    public boolean purchaseProduct(String name, int quantity) {
+        String selectSql = "SELECT stock FROM product WHERE name=?";
+        String updateSql = "UPDATE product SET stock = stock - ? WHERE name=?";
+        try (Connection conn = DriverManager.getConnection(driverURL)) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement selectStmt = conn.prepareStatement(selectSql)) {
+                selectStmt.setString(1, name);
+                try (ResultSet rs = selectStmt.executeQuery()) {
+                    if (!rs.next()) {
+                        conn.rollback();
+                        return false;
+                    }
+                    int currentStock = rs.getInt("stock");
+                    if (quantity <= 0 || quantity > currentStock) {
+                        conn.rollback();
+                        return false;
+                    }
+                }
+            }
+
+            try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                updateStmt.setInt(1, quantity);
+                updateStmt.setString(2, name);
+                updateStmt.executeUpdate();
+            }
+            conn.commit();
+            return true;
+        } catch (Exception ex) {
+            System.out.println("purchaseProduct error: " + ex.getMessage());
+        }
+        return false;
+    }
+
     /**
      * Sets the locked column for a user.
      * Pass 1 to lock, 0 to unlock.
@@ -498,6 +572,17 @@ public class SQLite {
             System.out.println("User " + username + " has been deleted.");
         } catch (Exception ex) {
             System.out.println("removeUser error: " + ex.getMessage());
+        }
+    }
+
+    public void removeProduct(String name) {
+        String sql = "DELETE FROM product WHERE name=?";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, name);
+            pstmt.executeUpdate();
+        } catch (Exception ex) {
+            System.out.println("removeProduct error: " + ex.getMessage());
         }
     }
 }

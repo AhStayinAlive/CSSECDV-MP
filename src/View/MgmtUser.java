@@ -25,6 +25,20 @@ public class MgmtUser extends javax.swing.JPanel {
     }
 
     public void init() {
+        if (!isAdmin()) {
+            for (int nCtr = tableModel.getRowCount(); nCtr > 0; nCtr--) {
+                tableModel.removeRow(0);
+            }
+            editRoleBtn.setVisible(false);
+            deleteBtn.setVisible(false);
+            lockBtn.setVisible(false);
+            chgpassBtn.setVisible(false);
+            return;
+        }
+        editRoleBtn.setVisible(true);
+        deleteBtn.setVisible(true);
+        lockBtn.setVisible(true);
+        chgpassBtn.setVisible(true);
         for (int nCtr = tableModel.getRowCount(); nCtr > 0; nCtr--) {
             tableModel.removeRow(0);
         }
@@ -198,6 +212,7 @@ public class MgmtUser extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void editRoleBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editRoleBtnActionPerformed
+        if (!isAdmin()) return;
         if (table.getSelectedRow() < 0) return;
 
         if (!reAuthenticate()) return;
@@ -228,6 +243,7 @@ public class MgmtUser extends javax.swing.JPanel {
     }//GEN-LAST:event_editRoleBtnActionPerformed
 
     private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
+        if (!isAdmin()) return;
         if (table.getSelectedRow() < 0) return;
 
         String targetUser = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
@@ -244,6 +260,7 @@ public class MgmtUser extends javax.swing.JPanel {
     }//GEN-LAST:event_deleteBtnActionPerformed
 
     private void lockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockBtnActionPerformed
+        if (!isAdmin()) return;
         if (table.getSelectedRow() < 0) return;
 
         String targetUser  = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
@@ -265,6 +282,7 @@ public class MgmtUser extends javax.swing.JPanel {
     }//GEN-LAST:event_lockBtnActionPerformed
 
     private void chgpassBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chgpassBtnActionPerformed
+        if (!isAdmin()) return;
         if (table.getSelectedRow() < 0) return;
 
         String targetUser = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
@@ -308,6 +326,11 @@ public class MgmtUser extends javax.swing.JPanel {
                 "Success", JOptionPane.INFORMATION_MESSAGE);
         init();
     }//GEN-LAST:event_chgpassBtnActionPerformed
+
+    private boolean isAdmin() {
+        return frame != null && frame.sessionUser != null
+                && frame.sessionUser.getRole() == Frame.ROLE_ADMIN;
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton chgpassBtn;

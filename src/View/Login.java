@@ -154,8 +154,8 @@ public class Login extends javax.swing.JPanel {
             return;
         }
 
-        // Step 5 — check if the account is already disabled (role == 1)
-        if (user.getRole() == 1) {
+        // Step 5 — check if the account is disabled or manually locked
+        if (user.getRole() == Frame.ROLE_DISABLED || user.getLocked() == 1) {
             JOptionPane.showMessageDialog(this,
                     "This account has been disabled. Please contact the administrator.",
                     "Account Disabled", JOptionPane.ERROR_MESSAGE);
