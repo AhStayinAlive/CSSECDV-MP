@@ -9,6 +9,39 @@ public class Register extends javax.swing.JPanel {
 
     public Register() {
         initComponents();
+
+        // Limit Username to 30 characters
+        usernameFld.setDocument(new javax.swing.text.PlainDocument() {
+            @Override
+            public void insertString(int offs, String str, javax.swing.text.AttributeSet a) throws javax.swing.text.BadLocationException {
+                if (str == null) return;
+                if ((getLength() + str.length()) <= 30) {
+                    super.insertString(offs, str, a);
+                }
+            }
+        });
+
+        // Limit Password to 64 characters
+        passwordFld.setDocument(new javax.swing.text.PlainDocument() {
+            @Override
+            public void insertString(int offs, String str, javax.swing.text.AttributeSet a) throws javax.swing.text.BadLocationException {
+                if (str == null) return;
+                if ((getLength() + str.length()) <= 64) {
+                    super.insertString(offs, str, a);
+                }
+            }
+        });
+
+        // Limit Confirm Password to 64 characters
+        confpassFld.setDocument(new javax.swing.text.PlainDocument() {
+            @Override
+            public void insertString(int offs, String str, javax.swing.text.AttributeSet a) throws javax.swing.text.BadLocationException {
+                if (str == null) return;
+                if ((getLength() + str.length()) <= 64) {
+                    super.insertString(offs, str, a);
+                }
+            }
+        });
     }
 
     // -----------------------------------------------------------------------

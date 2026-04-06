@@ -260,8 +260,8 @@ public class SQLite {
         String sql = "SELECT id, username, name, stock, timestamp FROM history";
         ArrayList<History> histories = new ArrayList<>();
         try (Connection conn = DriverManager.getConnection(driverURL);
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 histories.add(new History(rs.getInt("id"),
                         rs.getString("username"),
@@ -279,8 +279,8 @@ public class SQLite {
         String sql = "SELECT id, event, username, desc, timestamp FROM logs";
         ArrayList<Logs> logs = new ArrayList<>();
         try (Connection conn = DriverManager.getConnection(driverURL);
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 logs.add(new Logs(rs.getInt("id"),
                         rs.getString("event"),
@@ -298,8 +298,8 @@ public class SQLite {
         String sql = "SELECT id, name, stock, price FROM product";
         ArrayList<Product> products = new ArrayList<>();
         try (Connection conn = DriverManager.getConnection(driverURL);
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 products.add(new Product(rs.getInt("id"),
                         rs.getString("name"),

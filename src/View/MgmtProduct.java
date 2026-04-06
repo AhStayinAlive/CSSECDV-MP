@@ -57,6 +57,18 @@ public class MgmtProduct extends javax.swing.JPanel {
         component.setBackground(new java.awt.Color(240, 240, 240));
         component.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         component.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 2, true), text, javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12)));
+
+        // Give Product Names 50 characters, limit numbers to 10 characters
+        int limit = text.equals("PRODUCT NAME") ? 50 : 10;
+        component.setDocument(new javax.swing.text.PlainDocument() {
+            @Override
+            public void insertString(int offs, String str, javax.swing.text.AttributeSet a) throws javax.swing.text.BadLocationException {
+                if (str == null) return;
+                if ((getLength() + str.length()) <= limit) {
+                    super.insertString(offs, str, a);
+                }
+            }
+        });
     }
     
     /**
@@ -185,7 +197,16 @@ public class MgmtProduct extends javax.swing.JPanel {
             int result = JOptionPane.showConfirmDialog(null, message, "PURCHASE PRODUCT", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 
             if (result == JOptionPane.OK_OPTION) {
-                System.out.println(stockFld.getText());
+                String purchaseStr = stockFld.getText().trim();
+                int quantity;
+                try {
+                    quantity = Integer.parseInt(purchaseStr);
+                    if (quantity <= 0) throw new NumberFormatException();
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(this, "Invalid Quantity. You must enter a positive whole number greater than 0.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                System.out.println("Validated Purchase Quantity: " + quantity);
             }
         }
     }//GEN-LAST:event_purchaseBtnActionPerformed
@@ -206,9 +227,30 @@ public class MgmtProduct extends javax.swing.JPanel {
         int result = JOptionPane.showConfirmDialog(null, message, "ADD PRODUCT", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 
         if (result == JOptionPane.OK_OPTION) {
-            System.out.println(nameFld.getText());
-            System.out.println(stockFld.getText());
-            System.out.println(priceFld.getText());
+            String name = nameFld.getText().trim();
+            String stockStr = stockFld.getText().trim();
+            String priceStr = priceFld.getText().trim();
+
+            if (!name.matches("^[a-zA-Z0-9 -]{1,50}$")) {
+                JOptionPane.showMessageDialog(this, "Invalid Product Name. Only letters, numbers, spaces, and hyphens allowed.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int stock;
+            double price;
+            try {
+                stock = Integer.parseInt(stockStr);
+                price = Double.parseDouble(priceStr);
+                if (stock < 0 || price < 0) throw new NumberFormatException();
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Invalid Input. Stock must be a whole number and Price must be a valid positive amount.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            // ------------------------------------------
+
+            // Data is safe, send to database
+            sqlite.addProduct(name, stock, price);
+            init(); // Refresh table
         }
     }//GEN-LAST:event_addBtnActionPerformed
 
@@ -229,9 +271,30 @@ public class MgmtProduct extends javax.swing.JPanel {
             int result = JOptionPane.showConfirmDialog(null, message, "EDIT PRODUCT", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 
             if (result == JOptionPane.OK_OPTION) {
-                System.out.println(nameFld.getText());
-                System.out.println(stockFld.getText());
-                System.out.println(priceFld.getText());
+                String name = nameFld.getText().trim();
+                String stockStr = stockFld.getText().trim();
+                String priceStr = priceFld.getText().trim();
+
+                // --- ADDED BY PERSON 3: Data Validation ---
+                if (!name.matches("^[a-zA-Z0-9 -]{1,50}$")) {
+                    JOptionPane.showMessageDialog(this, "Invalid Product Name. Only letters, numbers, spaces, and hyphens allowed.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                int stock;
+                double price;
+                try {
+                    stock = Integer.parseInt(stockStr);
+                    price = Double.parseDouble(priceStr);
+                    if (stock < 0 || price < 0) throw new NumberFormatException();
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(this, "Invalid Input. Stock must be a whole number and Price must be a valid positive amount.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                // ------------------------------------------
+
+                // (Note: To make edit fully work, Person 3's job is done here, but you'll need an updateProduct method in SQLite.java eventually!)
+                System.out.println("Validated Edit: " + name + ", " + stock + ", " + price);
             }
         }
     }//GEN-LAST:event_editBtnActionPerformed

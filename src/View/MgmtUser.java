@@ -214,6 +214,14 @@ public class MgmtUser extends javax.swing.JPanel {
 
         if (result != null) {
             int newRole = Character.getNumericValue(result.charAt(0));
+            
+            if (newRole < 1 || newRole > 5) {
+                JOptionPane.showMessageDialog(this,
+                    "Invalid role code. Role must be an integer between 1 and 5.",
+                    "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return; // Reject the input and stop execution
+            }
+
             sqlite.updateUserRole(targetUser, newRole);
             init();
         }
