@@ -49,6 +49,10 @@ public class SQLite {
              Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
             LOGGER.log(Level.INFO, "Table initialized");
+            if (DEBUG_MODE == 1) {
+                addLogs("DB_INIT", "SYSTEM", "Database table created: history", 
+                        java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            }
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
@@ -251,6 +255,11 @@ public class SQLite {
             pstmt.setString(2, hashedPassword);
             pstmt.setInt(3, role);
             pstmt.executeUpdate();
+            LOGGER.log(Level.INFO, "User registered: " + username + " (role: " + role + ")");
+            if (DEBUG_MODE == 1) {
+                addLogs("USER_REGISTRATION", username, "User account created with role " + role, 
+                        java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            }
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
@@ -407,7 +416,7 @@ public class SQLite {
             pstmt.setString(1, username);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    return new User(
+                    User user = new User(
                             rs.getInt("id"),
                             rs.getString("username"),
                             rs.getString("password"),
@@ -416,6 +425,18 @@ public class SQLite {
                             rs.getInt("failed_attempts"),
                             rs.getString("last_login_timestamp"),
                             rs.getString("last_login_status"));
+                    LOGGER.log(Level.INFO, "User found: " + username);
+                    if (DEBUG_MODE == 1) {
+                        addLogs("USER_LOOKUP", username, "User authentication lookup successful", 
+                                java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                    }
+                    return user;
+                } else {
+                    LOGGER.log(Level.INFO, "User not found: " + username);
+                    if (DEBUG_MODE == 1) {
+                        addLogs("USER_LOOKUP", username, "User authentication lookup failed - user not found", 
+                                java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                    }
                 }
             }
         } catch (Exception ex) {

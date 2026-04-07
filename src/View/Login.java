@@ -206,6 +206,7 @@ public class Login extends javax.swing.JPanel {
         // Reset lockout counter and record this login
         frame.main.sqlite.resetFailedAttempts(username);
         frame.main.sqlite.updateLastLogin(username, currentTimestamp, "SUCCESS");
+        frame.main.sqlite.addLogs("LOGIN_SUCCESS", username, "User logged in successfully", currentTimestamp);
 
         // Re-fetch so sessionUser holds the fully up-to-date record
         User updatedUser = frame.main.sqlite.getUserByUsername(username);

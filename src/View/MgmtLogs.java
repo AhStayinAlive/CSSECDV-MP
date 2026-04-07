@@ -8,6 +8,7 @@ package View;
 import Controller.SQLite;
 import Model.Logs;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -154,10 +155,23 @@ public class MgmtLogs extends javax.swing.JPanel {
     private void debugBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_debugBtnActionPerformed
         try {
             if (frame == null || !frame.canAccessRoleHome(Frame.ROLE_ADMIN)) return;
-            if(sqlite.DEBUG_MODE == 1)
+            Logger rootLogger = Logger.getLogger("");
+            String currentTimestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            if(sqlite.DEBUG_MODE == 1) {
                 sqlite.DEBUG_MODE = 0;
-            else
+                rootLogger.setLevel(java.util.logging.Level.WARNING);
+                Logger.getLogger("CSSECDV").info("DEBUG MODE DISABLED - Logger level set to WARNING");
+                sqlite.addLogs("DEBUG_MODE", frame.sessionUser.getUsername(), "Debug mode disabled - Logger level set to WARNING", currentTimestamp);
+                javax.swing.JOptionPane.showMessageDialog(this, "Debug mode DISABLED\nLogger level: WARNING\nCheck app.log and Logs tab for details", "Debug Mode", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                init(); // Refresh the logs table
+            } else {
                 sqlite.DEBUG_MODE = 1;
+                rootLogger.setLevel(java.util.logging.Level.ALL);
+                Logger.getLogger("CSSECDV").info("DEBUG MODE ENABLED - Logger level set to ALL");
+                sqlite.addLogs("DEBUG_MODE", frame.sessionUser.getUsername(), "Debug mode enabled - Logger level set to ALL", currentTimestamp);
+                javax.swing.JOptionPane.showMessageDialog(this, "Debug mode ENABLED\nLogger level: ALL\nCheck app.log and Logs tab for details", "Debug Mode", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                init(); // Refresh the logs table
+            }
         } catch (Exception ex) {
             java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
             javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);

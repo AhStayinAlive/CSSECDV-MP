@@ -70,4 +70,11 @@
     nbproject/build-impl.xml file. 
 
     -->
+    <target name="-post-jar">
+        <manifest file="${dist.dir}/tmp-manifest.mf" mode="update">
+            <attribute name="Class-Path" value="../sqlite-jdbc-3.23.1.jar ../jbcrypt-0.4.jar"/>
+        </manifest>
+        <jar jarfile="${dist.jar}" manifest="${dist.dir}/tmp-manifest.mf" update="true"/>
+        <delete file="${dist.dir}/tmp-manifest.mf"/>
+    </target>
 </project>
