@@ -161,12 +161,12 @@ public class Login extends javax.swing.JPanel {
         }
 
         // // Step 5 — check if the account is disabled or manually locked
-        // if (user.getRole() == Frame.ROLE_DISABLED || user.getLocked() == 1) {
-        //     JOptionPane.showMessageDialog(this,
-        //             "This account has been disabled. Please contact the administrator.",
-        //             "Account Disabled", JOptionPane.ERROR_MESSAGE);
-        //     return;
-        // }
+        if (user.getRole() == Frame.ROLE_DISABLED || user.getLocked() == 1) {
+            JOptionPane.showMessageDialog(this,
+                    "This account has been disabled. Please contact the administrator.",
+                    "Account Disabled", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         // Step 6 — verify password with BCrypt
         // String currentTimestamp = LocalDateTime.now().format(TS_FMT);

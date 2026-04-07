@@ -351,7 +351,7 @@ public class Frame extends javax.swing.JFrame {
         main.sqlite.addUser(username, password);
     }
 
-    private boolean canAccessRoleHome(int requiredRole) {
+    public boolean canAccessRoleHome(int requiredRole) {
         return sessionUser != null && sessionUser.getRole() == requiredRole;
     }
 

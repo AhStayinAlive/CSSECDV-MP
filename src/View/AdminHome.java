@@ -151,7 +151,7 @@ public class AdminHome extends javax.swing.JPanel {
 
     private void usersBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_usersBtnActionPerformed
         try {
-            if (!isAdmin()) return;
+            if (frame == null || !frame.canAccessRoleHome(Frame.ROLE_ADMIN)) return;
             mgmtUser.init();
             usersBtn.setForeground(Color.red);
             productsBtn.setForeground(Color.black);
@@ -167,7 +167,7 @@ public class AdminHome extends javax.swing.JPanel {
 
     private void productsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productsBtnActionPerformed
         try {
-            if (!isAdmin()) return;
+            if (frame == null || !frame.canAccessRoleHome(Frame.ROLE_ADMIN)) return;
             mgmtProduct.init();
             usersBtn.setForeground(Color.black);
             productsBtn.setForeground(Color.red);
@@ -183,7 +183,7 @@ public class AdminHome extends javax.swing.JPanel {
 
     private void historyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_historyBtnActionPerformed
         try {
-            if (!isAdmin()) return;
+            if (frame == null || !frame.canAccessRoleHome(Frame.ROLE_ADMIN)) return;
             mgmtHistory.init();
             usersBtn.setForeground(Color.black);
             productsBtn.setForeground(Color.black);
@@ -199,7 +199,7 @@ public class AdminHome extends javax.swing.JPanel {
 
     private void logsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logsBtnActionPerformed
         try {
-            if (!isAdmin()) return;
+            if (frame == null || !frame.canAccessRoleHome(Frame.ROLE_ADMIN)) return;
             mgmtLogs.init();
             usersBtn.setForeground(Color.black);
             productsBtn.setForeground(Color.black);
@@ -212,11 +212,6 @@ public class AdminHome extends javax.swing.JPanel {
             if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
         }
     }//GEN-LAST:event_logsBtnActionPerformed
-
-    private boolean isAdmin() {
-        return frame != null && frame.sessionUser != null
-                && frame.sessionUser.getRole() == Frame.ROLE_ADMIN;
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel Content;

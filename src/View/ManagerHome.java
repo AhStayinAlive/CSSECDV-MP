@@ -150,7 +150,7 @@ public class ManagerHome extends javax.swing.JPanel {
 
     private void usersBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_usersBtnActionPerformed
         try {
-            if (!isManager()) return;
+            if (frame == null || !frame.canAccessRoleHome(Frame.ROLE_MANAGER)) return;
             mgmtUser.init();
             usersBtn.setForeground(Color.red); productsBtn.setForeground(Color.black);
             historyBtn.setForeground(Color.black); logsBtn.setForeground(Color.black);
@@ -164,7 +164,7 @@ public class ManagerHome extends javax.swing.JPanel {
 
     private void productsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productsBtnActionPerformed
         try {
-            if (!isManager()) return;
+            if (frame == null || !frame.canAccessRoleHome(Frame.ROLE_MANAGER)) return;
             mgmtProduct.init();
             usersBtn.setForeground(Color.black); productsBtn.setForeground(Color.red);
             historyBtn.setForeground(Color.black); logsBtn.setForeground(Color.black);
@@ -178,7 +178,7 @@ public class ManagerHome extends javax.swing.JPanel {
 
     private void historyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_historyBtnActionPerformed
         try {
-            if (!isManager()) return;
+            if (frame == null || !frame.canAccessRoleHome(Frame.ROLE_MANAGER)) return;
             mgmtHistory.init();
             usersBtn.setForeground(Color.black); productsBtn.setForeground(Color.black);
             historyBtn.setForeground(Color.red); logsBtn.setForeground(Color.black);
@@ -192,7 +192,7 @@ public class ManagerHome extends javax.swing.JPanel {
 
     private void logsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logsBtnActionPerformed
         try {
-            if (!isManager()) return;
+            if (frame == null || !frame.canAccessRoleHome(Frame.ROLE_MANAGER)) return;
             mgmtLogs.init();
             usersBtn.setForeground(Color.black); productsBtn.setForeground(Color.black);
             historyBtn.setForeground(Color.black); logsBtn.setForeground(Color.red);
@@ -203,11 +203,6 @@ public class ManagerHome extends javax.swing.JPanel {
             if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
         }
     }//GEN-LAST:event_logsBtnActionPerformed
-
-    private boolean isManager() {
-        return frame != null && frame.sessionUser != null
-                && frame.sessionUser.getRole() == Frame.ROLE_MANAGER;
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel Content;

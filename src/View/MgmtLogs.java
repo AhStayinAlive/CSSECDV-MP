@@ -29,7 +29,7 @@ public class MgmtLogs extends javax.swing.JPanel {
     }
 
     public void init(){
-        if (!isAdmin()) {
+        if (frame == null || !frame.canAccessRoleHome(Frame.ROLE_ADMIN)) {
             clearBtn.setVisible(false);
             debugBtn.setVisible(false);
             return;
@@ -141,7 +141,7 @@ public class MgmtLogs extends javax.swing.JPanel {
 
     private void clearBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearBtnActionPerformed
         try {
-            if (!isAdmin()) return;
+            if (frame == null || !frame.canAccessRoleHome(Frame.ROLE_ADMIN)) return;
             sqlite.clearLogs();
             init();
         } catch (Exception ex) {
@@ -153,7 +153,7 @@ public class MgmtLogs extends javax.swing.JPanel {
 
     private void debugBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_debugBtnActionPerformed
         try {
-            if (!isAdmin()) return;
+            if (frame == null || !frame.canAccessRoleHome(Frame.ROLE_ADMIN)) return;
             if(sqlite.DEBUG_MODE == 1)
                 sqlite.DEBUG_MODE = 0;
             else
@@ -164,12 +164,6 @@ public class MgmtLogs extends javax.swing.JPanel {
             if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
         }
     }//GEN-LAST:event_debugBtnActionPerformed
-
-    private boolean isAdmin() {
-        return frame != null && frame.sessionUser != null
-                && frame.sessionUser.getRole() == Frame.ROLE_ADMIN;
-    }
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton clearBtn;
