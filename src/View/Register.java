@@ -175,7 +175,10 @@ public class Register extends javax.swing.JPanel {
         String confpass = new String(confpassFld.getPassword());
 
         // --- Username validation ---
+        String currentTimestamp = new java.sql.Timestamp(new java.util.Date().getTime()).toString();
         if (!isValidUsername(username)) {
+            frame.main.sqlite.addLogs("VALIDATION_FAILURE", username,
+                    "Invalid username format during registration", currentTimestamp);
             JOptionPane.showMessageDialog(this,
                 "Username must be 3–30 characters and contain only letters, digits, or underscores.",
                 "Registration Error", JOptionPane.ERROR_MESSAGE);
@@ -184,6 +187,8 @@ public class Register extends javax.swing.JPanel {
 
         // --- Duplicate username check ---
         if (frame.main.sqlite.getUserByUsername(username) != null) {
+            frame.main.sqlite.addLogs("VALIDATION_FAILURE", username,
+                    "Attempted registration with an existing username", currentTimestamp);
             JOptionPane.showMessageDialog(this,
                 "That username is already taken. Please choose another.",
                 "Registration Error", JOptionPane.ERROR_MESSAGE);
@@ -192,6 +197,8 @@ public class Register extends javax.swing.JPanel {
 
         // --- Password policy ---
         if (!isValidPassword(password)) {
+            frame.main.sqlite.addLogs("VALIDATION_FAILURE", username,
+                    "Invalid password policy during registration", currentTimestamp);
             JOptionPane.showMessageDialog(this,
                 "Password must be 8–64 characters and contain uppercase, lowercase, digit, and special character.",
                 "Registration Error", JOptionPane.ERROR_MESSAGE);
@@ -200,6 +207,8 @@ public class Register extends javax.swing.JPanel {
 
         // --- Confirm password match ---
         if (!password.equals(confpass)) {
+             frame.main.sqlite.addLogs("VALIDATION_FAILURE", username,
+                    "Password confirmation mismatch during registration", currentTimestamp);
             JOptionPane.showMessageDialog(this,
                 "Passwords do not match.",
                 "Registration Error", JOptionPane.ERROR_MESSAGE);

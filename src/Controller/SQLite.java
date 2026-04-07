@@ -320,6 +320,16 @@ public class SQLite {
         return logs;
     }
 
+    public void clearLogs() {
+        String sql = "DELETE FROM logs";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.executeUpdate();
+        } catch (Exception ex) {
+            System.out.println("clearLogs error: " + ex.getMessage());
+        }
+    }
+
     public ArrayList<Product> getProduct() {
         String sql = "SELECT id, name, stock, price FROM product";
         ArrayList<Product> products = new ArrayList<>();

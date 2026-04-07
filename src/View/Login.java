@@ -132,9 +132,12 @@ public class Login extends javax.swing.JPanel {
 
         // Clear password field immediately so it isn't readable in memory longer than needed
         passwordFld.setText("");
+        String currentTimestamp = LocalDateTime.now().format(TS_FMT);
 
         // Step 2 — basic empty-field guard
-        if (username.isEmpty() || enteredPassword.isEmpty()) {
+        if (username.isEmpty() || enteredPassword.trim().isEmpty()) {
+            frame.main.sqlite.addLogs("VALIDATION_FAILURE", username,
+                    "Login validation failed: missing username or password", currentTimestamp);
             JOptionPane.showMessageDialog(this,
                     "Invalid username and/or password.",
                     "Login Failed", JOptionPane.ERROR_MESSAGE);
@@ -149,22 +152,24 @@ public class Login extends javax.swing.JPanel {
         //           then show the same generic error as a wrong password.
         if (user == null) {
             BCrypt.checkpw(enteredPassword, DUMMY_HASH);   // constant-time defence
+            frame.main.sqlite.addLogs("LOGIN_FAILURE", username,
+                    "Invalid username or password", currentTimestamp);
             JOptionPane.showMessageDialog(this,
                     "Invalid username and/or password.",
                     "Login Failed", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Step 5 — check if the account is disabled or manually locked
-        if (user.getRole() == Frame.ROLE_DISABLED || user.getLocked() == 1) {
-            JOptionPane.showMessageDialog(this,
-                    "This account has been disabled. Please contact the administrator.",
-                    "Account Disabled", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        // // Step 5 — check if the account is disabled or manually locked
+        // if (user.getRole() == Frame.ROLE_DISABLED || user.getLocked() == 1) {
+        //     JOptionPane.showMessageDialog(this,
+        //             "This account has been disabled. Please contact the administrator.",
+        //             "Account Disabled", JOptionPane.ERROR_MESSAGE);
+        //     return;
+        // }
 
         // Step 6 — verify password with BCrypt
-        String currentTimestamp = LocalDateTime.now().format(TS_FMT);
+        // String currentTimestamp = LocalDateTime.now().format(TS_FMT);
         boolean passwordMatches = BCrypt.checkpw(enteredPassword, user.getPassword());
 
         if (!passwordMatches) {
@@ -177,11 +182,15 @@ public class Login extends javax.swing.JPanel {
                 // Lock the account on the 5th failure
                 frame.main.sqlite.disableUser(username);
                 frame.main.sqlite.updateLastLogin(username, currentTimestamp, "FAILED");
+                frame.main.sqlite.addLogs("ACCOUNT_LOCKED", username,
+                        "Account locked after 5 failed login attempts", currentTimestamp);
                 JOptionPane.showMessageDialog(this,
                         "This account has been disabled. Please contact the administrator.",
                         "Account Disabled", JOptionPane.ERROR_MESSAGE);
             } else {
                 frame.main.sqlite.updateLastLogin(username, currentTimestamp, "FAILED");
+                frame.main.sqlite.addLogs("LOGIN_FAILURE", username,
+                        "Invalid username or password (attempt " + attempts + ")", currentTimestamp);
                 JOptionPane.showMessageDialog(this,
                         "Invalid username and/or password.",
                         "Login Failed", JOptionPane.ERROR_MESSAGE);
