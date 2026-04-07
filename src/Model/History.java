@@ -47,7 +47,7 @@ public class History {
             }
             return new Timestamp(dateformatNoMillis.parse(timestamp).getTime());
         } catch (ParseException ex) {
-            System.out.println("History timestamp parse error: " + ex.getMessage());
+            java.util.logging.Logger.getLogger(History.class.getName()).log(java.util.logging.Level.WARNING, "Timestamp parse failed", ex);
             return new Timestamp(new Date().getTime());
         }
     }

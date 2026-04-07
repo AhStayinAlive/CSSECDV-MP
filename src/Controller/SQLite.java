@@ -326,7 +326,7 @@ public class SQLite {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.executeUpdate();
         } catch (Exception ex) {
-            System.out.println("clearLogs error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 

@@ -54,7 +54,7 @@ public class Logs {
             }
             return new Timestamp(dateformatNoMillis.parse(timestamp).getTime());
         } catch (ParseException ex) {
-            System.out.println("Logs timestamp parse error: " + ex.getMessage());
+            java.util.logging.Logger.getLogger(Logs.class.getName()).log(java.util.logging.Level.WARNING, "Timestamp parse failed", ex);
             return new Timestamp(new Date().getTime());
         }
     }
