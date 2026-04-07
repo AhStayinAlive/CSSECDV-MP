@@ -7,6 +7,12 @@ import javax.swing.WindowConstants;
 
 public class Frame extends javax.swing.JFrame {
 
+    public static final int ROLE_DISABLED = 1;
+    public static final int ROLE_CLIENT   = 2;
+    public static final int ROLE_STAFF    = 3;
+    public static final int ROLE_MANAGER  = 4;
+    public static final int ROLE_ADMIN    = 5;
+
     /** The user currently logged in. Set by Login on success; cleared on logout. */
     public User sessionUser = null;
 
@@ -182,28 +188,68 @@ public class Frame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void adminBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adminBtnActionPerformed
-        adminHomePnl.showPnl("home");
-        contentView.show(Content, "adminHomePnl");
+        try {
+            if (!canAccessRoleHome(ROLE_ADMIN)) return;
+            adminHomePnl.showPnl("home");
+            contentView.show(Content, "adminHomePnl");
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            sessionUser = null;
+            loginNav();
+        }
     }//GEN-LAST:event_adminBtnActionPerformed
 
     private void managerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_managerBtnActionPerformed
-        managerHomePnl.showPnl("home");
-        contentView.show(Content, "managerHomePnl");
+        try {
+            if (!canAccessRoleHome(ROLE_MANAGER)) return;
+            managerHomePnl.showPnl("home");
+            contentView.show(Content, "managerHomePnl");
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            sessionUser = null;
+            loginNav();
+        }
     }//GEN-LAST:event_managerBtnActionPerformed
 
     private void staffBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_staffBtnActionPerformed
-        staffHomePnl.showPnl("home");
-        contentView.show(Content, "staffHomePnl");
+        try {
+            if (!canAccessRoleHome(ROLE_STAFF)) return;
+            staffHomePnl.showPnl("home");
+            contentView.show(Content, "staffHomePnl");
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            sessionUser = null;
+            loginNav();
+        }
     }//GEN-LAST:event_staffBtnActionPerformed
 
     private void clientBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientBtnActionPerformed
-        clientHomePnl.showPnl("home");
-        contentView.show(Content, "clientHomePnl");
+        try {
+            if (!canAccessRoleHome(ROLE_CLIENT)) return;
+            clientHomePnl.showPnl("home");
+            contentView.show(Content, "clientHomePnl");
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            sessionUser = null;
+            loginNav();
+        }
     }//GEN-LAST:event_clientBtnActionPerformed
 
     private void logoutBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logoutBtnActionPerformed
-        sessionUser = null;
-        frameView.show(Container, "loginPnl");
+        try {
+            sessionUser = null;
+            configureNavigationForRole(0);
+            frameView.show(Container, "loginPnl");
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            sessionUser = null;
+            configureNavigationForRole(0);
+            frameView.show(Container, "loginPnl");
+        }
     }//GEN-LAST:event_logoutBtnActionPerformed
 
     public Main main;
@@ -260,32 +306,39 @@ public class Frame extends javax.swing.JFrame {
     public void mainNav(User user, String prevTimestamp, String prevStatus) {
         sessionUser = user;
         frameView.show(Container, "homePnl");
+        configureNavigationForRole(user.getRole());
 
         int role = user.getRole();
-        if (role == 5) {                          // Administrator
+        if (role == ROLE_ADMIN) {                // Administrator
             adminHomePnl.updateLastLogin(prevTimestamp, prevStatus);
             adminHomePnl.showPnl("home");
             contentView.show(Content, "adminHomePnl");
-        } else if (role == 4) {                   // Manager
+        } else if (role == ROLE_MANAGER) {       // Manager
             managerHomePnl.updateLastLogin(prevTimestamp, prevStatus);
             managerHomePnl.showPnl("home");
             contentView.show(Content, "managerHomePnl");
-        } else if (role == 3) {                   // Staff
+        } else if (role == ROLE_STAFF) {         // Staff
             staffHomePnl.updateLastLogin(prevTimestamp, prevStatus);
             staffHomePnl.showPnl("home");
             contentView.show(Content, "staffHomePnl");
-        } else {                                   // Client (role == 2) or other
+        } else if (role == ROLE_CLIENT) {         // Client
             clientHomePnl.updateLastLogin(prevTimestamp, prevStatus);
             clientHomePnl.showPnl("home");
             contentView.show(Content, "clientHomePnl");
+        } else {
+            sessionUser = null;
+            configureNavigationForRole(0);
+            frameView.show(Container, "loginPnl");
         }
     }
 
     public void loginNav() {
+        configureNavigationForRole(0);
         frameView.show(Container, "loginPnl");
     }
 
     public void registerNav() {
+        configureNavigationForRole(0);
         frameView.show(Container, "registerPnl");
     }
 
@@ -296,6 +349,17 @@ public class Frame extends javax.swing.JFrame {
      */
     public void registerAction(String username, String password) {
         main.sqlite.addUser(username, password);
+    }
+
+    private boolean canAccessRoleHome(int requiredRole) {
+        return sessionUser != null && sessionUser.getRole() == requiredRole;
+    }
+
+    private void configureNavigationForRole(int role) {
+        adminBtn.setVisible(role == ROLE_ADMIN);
+        managerBtn.setVisible(role == ROLE_MANAGER);
+        staffBtn.setVisible(role == ROLE_STAFF);
+        clientBtn.setVisible(role == ROLE_CLIENT);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

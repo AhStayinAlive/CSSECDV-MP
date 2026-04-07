@@ -12,6 +12,7 @@ public class ManagerHome extends javax.swing.JPanel {
     public MgmtUser    mgmtUser;
 
     private Home home;
+    private Frame frame;
     private CardLayout contentView = new CardLayout();
 
     public ManagerHome() {
@@ -19,9 +20,10 @@ public class ManagerHome extends javax.swing.JPanel {
     }
 
     public void init(SQLite sqlite, Frame frame) {
-        mgmtHistory = new MgmtHistory(sqlite);
-        mgmtLogs    = new MgmtLogs(sqlite);
-        mgmtProduct = new MgmtProduct(sqlite);
+        this.frame = frame;
+        mgmtHistory = new MgmtHistory(sqlite, frame);
+        mgmtLogs    = new MgmtLogs(sqlite, frame);
+        mgmtProduct = new MgmtProduct(sqlite, frame);
         mgmtUser    = new MgmtUser(sqlite, frame);
 
         home = new Home("WELCOME MANAGER!", new java.awt.Color(153, 102, 255));
@@ -32,6 +34,7 @@ public class ManagerHome extends javax.swing.JPanel {
         Content.add(mgmtHistory,      "mgmtHistory");
         Content.add(mgmtProduct,      "mgmtProduct");
         Content.add(mgmtLogs,         "mgmtLogs");
+        configureRoleView();
     }
 
     public void updateLastLogin(String lastLoginTimestamp, String lastLoginStatus) {
@@ -42,6 +45,13 @@ public class ManagerHome extends javax.swing.JPanel {
 
     public void showPnl(String panelName) {
         contentView.show(Content, panelName);
+    }
+
+    private void configureRoleView() {
+        productsBtn.setVisible(true);
+        historyBtn.setVisible(true);
+        usersBtn.setVisible(false);
+        logsBtn.setVisible(false);
     }
 
     @SuppressWarnings("unchecked")
@@ -139,32 +149,65 @@ public class ManagerHome extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void usersBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_usersBtnActionPerformed
-        mgmtUser.init();
-        usersBtn.setForeground(Color.red); productsBtn.setForeground(Color.black);
-        historyBtn.setForeground(Color.black); logsBtn.setForeground(Color.black);
-        contentView.show(Content, "mgmtUser");
+        try {
+            if (!isManager()) return;
+            mgmtUser.init();
+            usersBtn.setForeground(Color.red); productsBtn.setForeground(Color.black);
+            historyBtn.setForeground(Color.black); logsBtn.setForeground(Color.black);
+            contentView.show(Content, "mgmtUser");
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
+        }
     }//GEN-LAST:event_usersBtnActionPerformed
 
     private void productsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productsBtnActionPerformed
-        mgmtProduct.init();
-        usersBtn.setForeground(Color.black); productsBtn.setForeground(Color.red);
-        historyBtn.setForeground(Color.black); logsBtn.setForeground(Color.black);
-        contentView.show(Content, "mgmtProduct");
+        try {
+            if (!isManager()) return;
+            mgmtProduct.init();
+            usersBtn.setForeground(Color.black); productsBtn.setForeground(Color.red);
+            historyBtn.setForeground(Color.black); logsBtn.setForeground(Color.black);
+            contentView.show(Content, "mgmtProduct");
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
+        }
     }//GEN-LAST:event_productsBtnActionPerformed
 
     private void historyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_historyBtnActionPerformed
-        mgmtHistory.init();
-        usersBtn.setForeground(Color.black); productsBtn.setForeground(Color.black);
-        historyBtn.setForeground(Color.red); logsBtn.setForeground(Color.black);
-        contentView.show(Content, "mgmtHistory");
+        try {
+            if (!isManager()) return;
+            mgmtHistory.init();
+            usersBtn.setForeground(Color.black); productsBtn.setForeground(Color.black);
+            historyBtn.setForeground(Color.red); logsBtn.setForeground(Color.black);
+            contentView.show(Content, "mgmtHistory");
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
+        }
     }//GEN-LAST:event_historyBtnActionPerformed
 
     private void logsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logsBtnActionPerformed
-        mgmtLogs.init();
-        usersBtn.setForeground(Color.black); productsBtn.setForeground(Color.black);
-        historyBtn.setForeground(Color.black); logsBtn.setForeground(Color.red);
-        contentView.show(Content, "mgmtLogs");
+        try {
+            if (!isManager()) return;
+            mgmtLogs.init();
+            usersBtn.setForeground(Color.black); productsBtn.setForeground(Color.black);
+            historyBtn.setForeground(Color.black); logsBtn.setForeground(Color.red);
+            contentView.show(Content, "mgmtLogs");
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
+        }
     }//GEN-LAST:event_logsBtnActionPerformed
+
+    private boolean isManager() {
+        return frame != null && frame.sessionUser != null
+                && frame.sessionUser.getRole() == Frame.ROLE_MANAGER;
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel Content;

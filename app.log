@@ -1,0 +1,14 @@
+Apr 07, 2026 1:33:05 PM java.awt.Component dispatchEventImpl
+FINEST: sun.awt.TimedWindowEvent[WINDOW_LOST_FOCUS,opposite=null,oldState=0,newState=0] on frame0
+Apr 07, 2026 1:33:05 PM java.awt.Component dispatchEventImpl
+FINEST: java.awt.event.WindowEvent[WINDOW_DEACTIVATED,opposite=null,oldState=0,newState=0] on frame0
+Apr 07, 2026 1:33:05 PM java.awt.KeyboardFocusManager retargetFocusEvent
+FINER: >>> java.awt.event.WindowEvent[WINDOW_DEACTIVATED,opposite=null,oldState=0,newState=0] on frame0
+Apr 07, 2026 1:33:05 PM java.awt.DefaultKeyboardFocusManager dispatchEvent
+FINE: java.awt.event.WindowEvent[WINDOW_DEACTIVATED,opposite=null,oldState=0,newState=0] on frame0
+Apr 07, 2026 1:33:05 PM java.awt.KeyboardFocusManager setGlobalActiveWindow
+FINER: Setting global active window to null, old active View.Frame[frame0,782,427,996x539,invalid,layout=java.awt.BorderLayout,title=CSSECDV - SECURITY Svcs,resizable,normal,defaultCloseOperation=EXIT_ON_CLOSE,rootPane=javax.swing.JRootPane[,8,31,980x500,layout=javax.swing.JRootPane$RootLayout,alignmentX=0.0,alignmentY=0.0,border=,flags=16777673,maximumSize=,minimumSize=,preferredSize=],rootPaneCheckingEnabled=true]
+Apr 07, 2026 1:33:05 PM java.awt.Component dispatchEventImpl
+FINEST: java.awt.event.WindowEvent[WINDOW_DEACTIVATED,opposite=null,oldState=0,newState=0] on frame0
+Apr 07, 2026 1:33:05 PM java.awt.EventDispatchThread pumpOneEventForFilters
+FINEST: Dispatching: java.awt.SentEvent[] on sun.awt.windows.WToolkit@257fbebf

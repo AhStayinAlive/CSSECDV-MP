@@ -21,10 +21,12 @@ public class MgmtHistory extends javax.swing.JPanel {
 
     public SQLite sqlite;
     public DefaultTableModel tableModel;
+    public Frame frame;
     
-    public MgmtHistory(SQLite sqlite) {
+    public MgmtHistory(SQLite sqlite, Frame frame) {
         initComponents();
         this.sqlite = sqlite;
+        this.frame = frame;
         tableModel = (DefaultTableModel)table.getModel();
         table.getTableHeader().setFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, 14));
         javax.swing.table.DefaultTableCellRenderer rightAlign = new javax.swing.table.DefaultTableCellRenderer();
@@ -44,20 +46,7 @@ public class MgmtHistory extends javax.swing.JPanel {
         for(int nCtr = tableModel.getRowCount(); nCtr > 0; nCtr--){
             tableModel.removeRow(0);
         }
-        
-//      LOAD CONTENTS
-        ArrayList<History> history = sqlite.getHistory();
-        for(int nCtr = 0; nCtr < history.size(); nCtr++){
-            Product product = sqlite.getProduct(history.get(nCtr).getName());
-            tableModel.addRow(new Object[]{
-                history.get(nCtr).getUsername(), 
-                history.get(nCtr).getName(), 
-                history.get(nCtr).getStock(), 
-                product.getPrice(), 
-                product.getPrice() * history.get(nCtr).getStock(), 
-                history.get(nCtr).getTimestamp()
-            });
-        }
+        reloadRows(getAccessibleHistory());
     }
     
     public void designer(JTextField component, String text){
@@ -159,46 +148,84 @@ public class MgmtHistory extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void searchBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBtnActionPerformed
-        JTextField searchFld = new JTextField("0");
-        designer(searchFld, "SEARCH USERNAME OR PRODUCT");
+        try {
+            JTextField searchFld = new JTextField("0");
+            designer(searchFld, "SEARCH USERNAME OR PRODUCT");
 
-        Object[] message = {
-            searchFld
-        };
+            Object[] message = {
+                searchFld
+            };
 
-        int result = JOptionPane.showConfirmDialog(null, message, "SEARCH HISTORY", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+            int result = JOptionPane.showConfirmDialog(null, message, "SEARCH HISTORY", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 
-        if (result == JOptionPane.OK_OPTION) {
-//          CLEAR TABLE
-            for(int nCtr = tableModel.getRowCount(); nCtr > 0; nCtr--){
-                tableModel.removeRow(0);
-            }
+            if (result == JOptionPane.OK_OPTION) {
+                for(int nCtr = tableModel.getRowCount(); nCtr > 0; nCtr--){
+                    tableModel.removeRow(0);
+                }
 
-//          LOAD CONTENTS
-            ArrayList<History> history = sqlite.getHistory();
-            for(int nCtr = 0; nCtr < history.size(); nCtr++){
-                if(searchFld.getText().contains(history.get(nCtr).getUsername()) || 
-                   history.get(nCtr).getUsername().contains(searchFld.getText()) || 
-                   searchFld.getText().contains(history.get(nCtr).getName()) || 
-                   history.get(nCtr).getName().contains(searchFld.getText())){
-                
-                    Product product = sqlite.getProduct(history.get(nCtr).getName());
-                    tableModel.addRow(new Object[]{
-                        history.get(nCtr).getUsername(), 
-                        history.get(nCtr).getName(), 
-                        history.get(nCtr).getStock(), 
-                        product.getPrice(), 
-                        product.getPrice() * history.get(nCtr).getStock(), 
-                        history.get(nCtr).getTimestamp()
-                    });
+                ArrayList<History> history = getAccessibleHistory();
+                for(int nCtr = 0; nCtr < history.size(); nCtr++){
+                    if(searchFld.getText().contains(history.get(nCtr).getUsername()) ||
+                       history.get(nCtr).getUsername().contains(searchFld.getText()) ||
+                       searchFld.getText().contains(history.get(nCtr).getName()) ||
+                       history.get(nCtr).getName().contains(searchFld.getText())){
+
+                        Product product = sqlite.getProduct(history.get(nCtr).getName());
+                        float price = (product != null) ? product.getPrice() : 0.0f;
+                        tableModel.addRow(new Object[]{
+                            history.get(nCtr).getUsername(),
+                            history.get(nCtr).getName(),
+                            history.get(nCtr).getStock(),
+                            price,
+                            price * history.get(nCtr).getStock(),
+                            history.get(nCtr).getTimestamp()
+                        });
+                    }
                 }
             }
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
         }
     }//GEN-LAST:event_searchBtnActionPerformed
 
     private void reloadBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reloadBtnActionPerformed
-        init();
+        try {
+            init();
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
+        }
     }//GEN-LAST:event_reloadBtnActionPerformed
+
+    private ArrayList<History> getAccessibleHistory() {
+        if (frame == null || frame.sessionUser == null) return new ArrayList<>();
+        int role = frame.sessionUser.getRole();
+        if (role == Frame.ROLE_MANAGER || role == Frame.ROLE_ADMIN) {
+            return sqlite.getHistory();
+        }
+        if (role == Frame.ROLE_CLIENT) {
+            return sqlite.getHistoryByUsername(frame.sessionUser.getUsername());
+        }
+        return new ArrayList<>();
+    }
+
+    private void reloadRows(ArrayList<History> history) {
+        for(int nCtr = 0; nCtr < history.size(); nCtr++){
+            Product product = sqlite.getProduct(history.get(nCtr).getName());
+            float price = (product != null) ? product.getPrice() : 0.0f;
+            tableModel.addRow(new Object[]{
+                history.get(nCtr).getUsername(),
+                history.get(nCtr).getName(),
+                history.get(nCtr).getStock(),
+                price,
+                price * history.get(nCtr).getStock(),
+                history.get(nCtr).getTimestamp()
+            });
+        }
+    }
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

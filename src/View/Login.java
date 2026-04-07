@@ -26,6 +26,28 @@ public class Login extends javax.swing.JPanel {
 
     public Login() {
         initComponents();
+
+        // Limit Username input to 30 characters
+        usernameFld.setDocument(new javax.swing.text.PlainDocument() {
+            @Override
+            public void insertString(int offs, String str, javax.swing.text.AttributeSet a) throws javax.swing.text.BadLocationException {
+                if (str == null) return;
+                if ((getLength() + str.length()) <= 30) {
+                    super.insertString(offs, str, a);
+                }
+            }
+        });
+
+        // Limit Password input to 64 characters
+        passwordFld.setDocument(new javax.swing.text.PlainDocument() {
+            @Override
+            public void insertString(int offs, String str, javax.swing.text.AttributeSet a) throws javax.swing.text.BadLocationException {
+                if (str == null) return;
+                if ((getLength() + str.length()) <= 64) {
+                    super.insertString(offs, str, a);
+                }
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")
@@ -103,15 +125,19 @@ public class Login extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void loginBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginBtnActionPerformed
+        try {
         // Step 1 — read field values; trim username, never trim password
         String username        = usernameFld.getText().trim();
         String enteredPassword = new String(passwordFld.getPassword());
 
         // Clear password field immediately so it isn't readable in memory longer than needed
         passwordFld.setText("");
+        String currentTimestamp = LocalDateTime.now().format(TS_FMT);
 
         // Step 2 — basic empty-field guard
-        if (username.isEmpty() || enteredPassword.isEmpty()) {
+        if (username.isEmpty() || enteredPassword.trim().isEmpty()) {
+            frame.main.sqlite.addLogs("VALIDATION_FAILURE", username,
+                    "Login validation failed: missing username or password", currentTimestamp);
             JOptionPane.showMessageDialog(this,
                     "Invalid username and/or password.",
                     "Login Failed", JOptionPane.ERROR_MESSAGE);
@@ -126,22 +152,24 @@ public class Login extends javax.swing.JPanel {
         //           then show the same generic error as a wrong password.
         if (user == null) {
             BCrypt.checkpw(enteredPassword, DUMMY_HASH);   // constant-time defence
+            frame.main.sqlite.addLogs("LOGIN_FAILURE", username,
+                    "Invalid username or password", currentTimestamp);
             JOptionPane.showMessageDialog(this,
                     "Invalid username and/or password.",
                     "Login Failed", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Step 5 — check if the account is already disabled (role == 1)
-        if (user.getRole() == 1) {
-            JOptionPane.showMessageDialog(this,
-                    "This account has been disabled. Please contact the administrator.",
-                    "Account Disabled", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        // // Step 5 — check if the account is disabled or manually locked
+        // if (user.getRole() == Frame.ROLE_DISABLED || user.getLocked() == 1) {
+        //     JOptionPane.showMessageDialog(this,
+        //             "This account has been disabled. Please contact the administrator.",
+        //             "Account Disabled", JOptionPane.ERROR_MESSAGE);
+        //     return;
+        // }
 
         // Step 6 — verify password with BCrypt
-        String currentTimestamp = LocalDateTime.now().format(TS_FMT);
+        // String currentTimestamp = LocalDateTime.now().format(TS_FMT);
         boolean passwordMatches = BCrypt.checkpw(enteredPassword, user.getPassword());
 
         if (!passwordMatches) {
@@ -154,11 +182,15 @@ public class Login extends javax.swing.JPanel {
                 // Lock the account on the 5th failure
                 frame.main.sqlite.disableUser(username);
                 frame.main.sqlite.updateLastLogin(username, currentTimestamp, "FAILED");
+                frame.main.sqlite.addLogs("ACCOUNT_LOCKED", username,
+                        "Account locked after 5 failed login attempts", currentTimestamp);
                 JOptionPane.showMessageDialog(this,
                         "This account has been disabled. Please contact the administrator.",
                         "Account Disabled", JOptionPane.ERROR_MESSAGE);
             } else {
                 frame.main.sqlite.updateLastLogin(username, currentTimestamp, "FAILED");
+                frame.main.sqlite.addLogs("LOGIN_FAILURE", username,
+                        "Invalid username or password (attempt " + attempts + ")", currentTimestamp);
                 JOptionPane.showMessageDialog(this,
                         "Invalid username and/or password.",
                         "Login Failed", JOptionPane.ERROR_MESSAGE);
@@ -181,6 +213,10 @@ public class Login extends javax.swing.JPanel {
 
         // Navigate — mainNav stores sessionUser and routes to the correct role panel
         frame.mainNav(updatedUser, prevTimestamp, prevStatus);
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_loginBtnActionPerformed
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed

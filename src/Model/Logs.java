@@ -22,7 +22,8 @@ public class Logs {
     private String desc;
     private Timestamp timestamp;
 
-    private SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+    private SimpleDateFormat dateformatNoMillis = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private SimpleDateFormat dateformatWithMillis = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     
     public Logs(String event, String desc){
         this.event = event;
@@ -43,15 +44,19 @@ public class Logs {
         this.event = event;
         this.username = username;
         this.desc = desc;
-        try {
-            this.timestamp = new Timestamp(dateformat.parse(timestamp).getTime());
-        } catch (ParseException ex) {
-            System.out.println("Logs timestamp parse error: " + ex.getMessage());
-        }
+        this.timestamp = parseTimestamp(timestamp);
     }
 
-    public int getId() {
-        return id;
+    private Timestamp parseTimestamp(String timestamp) {
+        try {
+            if (timestamp != null && timestamp.contains(".")) {
+                return new Timestamp(dateformatWithMillis.parse(timestamp).getTime());
+            }
+            return new Timestamp(dateformatNoMillis.parse(timestamp).getTime());
+        } catch (ParseException ex) {
+            java.util.logging.Logger.getLogger(Logs.class.getName()).log(java.util.logging.Level.WARNING, "Timestamp parse failed", ex);
+            return new Timestamp(new Date().getTime());
+        }
     }
 
     public void setId(int id) {

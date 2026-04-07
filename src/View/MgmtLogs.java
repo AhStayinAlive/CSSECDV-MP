@@ -18,19 +18,24 @@ public class MgmtLogs extends javax.swing.JPanel {
 
     public SQLite sqlite;
     public DefaultTableModel tableModel;
+    public Frame frame;
     
-    public MgmtLogs(SQLite sqlite) {
+    public MgmtLogs(SQLite sqlite, Frame frame) {
         initComponents();
         this.sqlite = sqlite;
+        this.frame = frame;
         tableModel = (DefaultTableModel)table.getModel();
         table.getTableHeader().setFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, 14));
-        
-//        UNCOMMENT TO DISABLE BUTTONS
-//        clearBtn.setVisible(false);
-//        debugBtn.setVisible(false);
     }
 
     public void init(){
+        if (!isAdmin()) {
+            clearBtn.setVisible(false);
+            debugBtn.setVisible(false);
+            return;
+        }
+        clearBtn.setVisible(true);
+        debugBtn.setVisible(true);
         //      CLEAR TABLE
         for(int nCtr = tableModel.getRowCount(); nCtr > 0; nCtr--){
             tableModel.removeRow(0);
@@ -135,15 +140,35 @@ public class MgmtLogs extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void clearBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearBtnActionPerformed
-        
+        try {
+            if (!isAdmin()) return;
+            sqlite.clearLogs();
+            init();
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
+        }
     }//GEN-LAST:event_clearBtnActionPerformed
 
     private void debugBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_debugBtnActionPerformed
-        if(sqlite.DEBUG_MODE == 1)
-            sqlite.DEBUG_MODE = 0;
-        else
-            sqlite.DEBUG_MODE = 1;
+        try {
+            if (!isAdmin()) return;
+            if(sqlite.DEBUG_MODE == 1)
+                sqlite.DEBUG_MODE = 0;
+            else
+                sqlite.DEBUG_MODE = 1;
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
+        }
     }//GEN-LAST:event_debugBtnActionPerformed
+
+    private boolean isAdmin() {
+        return frame != null && frame.sessionUser != null
+                && frame.sessionUser.getRole() == Frame.ROLE_ADMIN;
+    }
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

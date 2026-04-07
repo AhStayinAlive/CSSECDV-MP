@@ -9,6 +9,39 @@ public class Register extends javax.swing.JPanel {
 
     public Register() {
         initComponents();
+
+        // Limit Username to 30 characters
+        usernameFld.setDocument(new javax.swing.text.PlainDocument() {
+            @Override
+            public void insertString(int offs, String str, javax.swing.text.AttributeSet a) throws javax.swing.text.BadLocationException {
+                if (str == null) return;
+                if ((getLength() + str.length()) <= 30) {
+                    super.insertString(offs, str, a);
+                }
+            }
+        });
+
+        // Limit Password to 64 characters
+        passwordFld.setDocument(new javax.swing.text.PlainDocument() {
+            @Override
+            public void insertString(int offs, String str, javax.swing.text.AttributeSet a) throws javax.swing.text.BadLocationException {
+                if (str == null) return;
+                if ((getLength() + str.length()) <= 64) {
+                    super.insertString(offs, str, a);
+                }
+            }
+        });
+
+        // Limit Confirm Password to 64 characters
+        confpassFld.setDocument(new javax.swing.text.PlainDocument() {
+            @Override
+            public void insertString(int offs, String str, javax.swing.text.AttributeSet a) throws javax.swing.text.BadLocationException {
+                if (str == null) return;
+                if ((getLength() + str.length()) <= 64) {
+                    super.insertString(offs, str, a);
+                }
+            }
+        });
     }
 
     // -----------------------------------------------------------------------
@@ -136,12 +169,16 @@ public class Register extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
+        try {
         String username = usernameFld.getText().trim();
         String password = new String(passwordFld.getPassword());
         String confpass = new String(confpassFld.getPassword());
 
         // --- Username validation ---
+        String currentTimestamp = new java.sql.Timestamp(new java.util.Date().getTime()).toString();
         if (!isValidUsername(username)) {
+            frame.main.sqlite.addLogs("VALIDATION_FAILURE", username,
+                    "Invalid username format during registration", currentTimestamp);
             JOptionPane.showMessageDialog(this,
                 "Username must be 3–30 characters and contain only letters, digits, or underscores.",
                 "Registration Error", JOptionPane.ERROR_MESSAGE);
@@ -150,6 +187,8 @@ public class Register extends javax.swing.JPanel {
 
         // --- Duplicate username check ---
         if (frame.main.sqlite.getUserByUsername(username) != null) {
+            frame.main.sqlite.addLogs("VALIDATION_FAILURE", username,
+                    "Attempted registration with an existing username", currentTimestamp);
             JOptionPane.showMessageDialog(this,
                 "That username is already taken. Please choose another.",
                 "Registration Error", JOptionPane.ERROR_MESSAGE);
@@ -158,6 +197,8 @@ public class Register extends javax.swing.JPanel {
 
         // --- Password policy ---
         if (!isValidPassword(password)) {
+            frame.main.sqlite.addLogs("VALIDATION_FAILURE", username,
+                    "Invalid password policy during registration", currentTimestamp);
             JOptionPane.showMessageDialog(this,
                 "Password must be 8–64 characters and contain uppercase, lowercase, digit, and special character.",
                 "Registration Error", JOptionPane.ERROR_MESSAGE);
@@ -166,6 +207,8 @@ public class Register extends javax.swing.JPanel {
 
         // --- Confirm password match ---
         if (!password.equals(confpass)) {
+             frame.main.sqlite.addLogs("VALIDATION_FAILURE", username,
+                    "Password confirmation mismatch during registration", currentTimestamp);
             JOptionPane.showMessageDialog(this,
                 "Passwords do not match.",
                 "Registration Error", JOptionPane.ERROR_MESSAGE);
@@ -181,12 +224,20 @@ public class Register extends javax.swing.JPanel {
         confpassFld.setText("");
         usernameFld.setText("");
         frame.loginNav();
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_registerBtnActionPerformed
 
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
-        passwordFld.setText("");
-        confpassFld.setText("");
-        frame.loginNav();
+        try {
+            passwordFld.setText("");
+            confpassFld.setText("");
+            frame.loginNav();
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+        }
     }//GEN-LAST:event_backBtnActionPerformed
 
 
