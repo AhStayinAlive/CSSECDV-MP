@@ -2,6 +2,8 @@
 build/
 dist/
 nbproject/private/
+app.log
+app.log.lck
 
 # Database (runtime file, not source)
 database.db
