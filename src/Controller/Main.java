@@ -1,6 +1,11 @@
 package Controller;
 
 import View.Frame;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class Main {
 
@@ -11,6 +16,20 @@ public class Main {
     }
 
     public void init() {
+        // Configure logging: route all output to app.log, remove console handlers
+        try {
+            Logger rootLogger = Logger.getLogger("");
+            for (Handler h : rootLogger.getHandlers()) {
+                rootLogger.removeHandler(h);
+            }
+            FileHandler fh = new FileHandler("app.log", 50000, 1, true);
+            fh.setFormatter(new SimpleFormatter());
+            rootLogger.addHandler(fh);
+            rootLogger.setLevel(Level.ALL);
+        } catch (Exception ex) {
+            // If logging setup fails, continue silently
+        }
+
         sqlite = new SQLite();
 
         // Ensure the DB and tables exist (safe to call on every run)

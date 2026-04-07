@@ -11,9 +11,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.mindrot.jbcrypt.BCrypt;
 
 public class SQLite {
+
+    private static final Logger LOGGER = Logger.getLogger(SQLite.class.getName());
 
     public int DEBUG_MODE = 0;
     String driverURL = "jdbc:sqlite:" + "database.db";
@@ -26,10 +30,10 @@ public class SQLite {
         try (Connection conn = DriverManager.getConnection(driverURL)) {
             if (conn != null) {
                 DatabaseMetaData meta = conn.getMetaData();
-                System.out.println("Database database.db created.");
+                LOGGER.log(Level.INFO, "Database initialized");
             }
         } catch (Exception ex) {
-            System.out.println("createNewDatabase error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -44,9 +48,9 @@ public class SQLite {
         try (Connection conn = DriverManager.getConnection(driverURL);
              Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
-            System.out.println("Table history in database.db created.");
+            LOGGER.log(Level.INFO, "Table initialized");
         } catch (Exception ex) {
-            System.out.println("createHistoryTable error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -61,9 +65,9 @@ public class SQLite {
         try (Connection conn = DriverManager.getConnection(driverURL);
              Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
-            System.out.println("Table logs in database.db created.");
+            LOGGER.log(Level.INFO, "Table initialized");
         } catch (Exception ex) {
-            System.out.println("createLogsTable error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -77,9 +81,9 @@ public class SQLite {
         try (Connection conn = DriverManager.getConnection(driverURL);
              Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
-            System.out.println("Table product in database.db created.");
+            LOGGER.log(Level.INFO, "Table initialized");
         } catch (Exception ex) {
-            System.out.println("createProductTable error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -98,9 +102,9 @@ public class SQLite {
         try (Connection conn = DriverManager.getConnection(driverURL);
              Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
-            System.out.println("Table users in database.db created.");
+            LOGGER.log(Level.INFO, "Table initialized");
         } catch (Exception ex) {
-            System.out.println("createUserTable error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -120,13 +124,13 @@ public class SQLite {
             for (String sql : migrations) {
                 try (Statement stmt = conn.createStatement()) {
                     stmt.execute(sql);
-                    System.out.println("Migration applied: " + sql);
+                    LOGGER.log(Level.INFO, "Migration applied");
                 } catch (Exception ex) {
-                    // Column already exists — not an error
+                    LOGGER.log(Level.FINE, "Column already exists", ex);
                 }
             }
         } catch (Exception ex) {
-            System.out.println("migrateDatabase error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -139,9 +143,9 @@ public class SQLite {
         try (Connection conn = DriverManager.getConnection(driverURL);
              Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
-            System.out.println("Table history dropped.");
+            LOGGER.log(Level.INFO, "Table dropped");
         } catch (Exception ex) {
-            System.out.println("dropHistoryTable error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -150,9 +154,9 @@ public class SQLite {
         try (Connection conn = DriverManager.getConnection(driverURL);
              Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
-            System.out.println("Table logs dropped.");
+            LOGGER.log(Level.INFO, "Table dropped");
         } catch (Exception ex) {
-            System.out.println("dropLogsTable error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -161,9 +165,9 @@ public class SQLite {
         try (Connection conn = DriverManager.getConnection(driverURL);
              Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
-            System.out.println("Table product dropped.");
+            LOGGER.log(Level.INFO, "Table dropped");
         } catch (Exception ex) {
-            System.out.println("dropProductTable error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -172,9 +176,9 @@ public class SQLite {
         try (Connection conn = DriverManager.getConnection(driverURL);
              Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
-            System.out.println("Table users dropped.");
+            LOGGER.log(Level.INFO, "Table dropped");
         } catch (Exception ex) {
-            System.out.println("dropUserTable error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -192,7 +196,7 @@ public class SQLite {
             pstmt.setString(4, timestamp);
             pstmt.executeUpdate();
         } catch (Exception ex) {
-            System.out.println("addHistory error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -206,7 +210,7 @@ public class SQLite {
             pstmt.setString(4, timestamp);
             pstmt.executeUpdate();
         } catch (Exception ex) {
-            System.out.println("addLogs error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -219,7 +223,7 @@ public class SQLite {
             pstmt.setDouble(3, price);
             pstmt.executeUpdate();
         } catch (Exception ex) {
-            System.out.println("addProduct error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -233,7 +237,7 @@ public class SQLite {
             pstmt.setString(2, hashedPassword);
             pstmt.executeUpdate();
         } catch (Exception ex) {
-            System.out.println("addUser error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -248,7 +252,7 @@ public class SQLite {
             pstmt.setInt(3, role);
             pstmt.executeUpdate();
         } catch (Exception ex) {
-            System.out.println("addUser(role) error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -270,7 +274,7 @@ public class SQLite {
                         rs.getString("timestamp")));
             }
         } catch (Exception ex) {
-            System.out.println("getHistory error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
         return histories;
     }
@@ -292,7 +296,7 @@ public class SQLite {
                 }
             }
         } catch (Exception ex) {
-            System.out.println("getHistoryByUsername error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
         return histories;
     }
@@ -311,7 +315,7 @@ public class SQLite {
                         rs.getString("timestamp")));
             }
         } catch (Exception ex) {
-            System.out.println("getLogs error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
         return logs;
     }
@@ -329,7 +333,7 @@ public class SQLite {
                         rs.getFloat("price")));
             }
         } catch (Exception ex) {
-            System.out.println("getProduct error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
         return products;
     }
@@ -349,7 +353,7 @@ public class SQLite {
                 }
             }
         } catch (Exception ex) {
-            System.out.println("getProduct(name) error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
         return product;
     }
@@ -374,7 +378,7 @@ public class SQLite {
                         rs.getString("last_login_status")));
             }
         } catch (Exception ex) {
-            System.out.println("getUsers error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
         return users;
     }
@@ -405,7 +409,7 @@ public class SQLite {
                 }
             }
         } catch (Exception ex) {
-            System.out.println("getUserByUsername error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
         return null;
     }
@@ -423,7 +427,7 @@ public class SQLite {
             pstmt.setString(2, username);
             pstmt.executeUpdate();
         } catch (Exception ex) {
-            System.out.println("updatePassword error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -435,7 +439,7 @@ public class SQLite {
             pstmt.setString(1, username);
             pstmt.executeUpdate();
         } catch (Exception ex) {
-            System.out.println("incrementFailedAttempts error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -447,7 +451,7 @@ public class SQLite {
             pstmt.setString(1, username);
             pstmt.executeUpdate();
         } catch (Exception ex) {
-            System.out.println("resetFailedAttempts error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -459,7 +463,7 @@ public class SQLite {
             pstmt.setString(1, username);
             pstmt.executeUpdate();
         } catch (Exception ex) {
-            System.out.println("disableUser error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -473,7 +477,7 @@ public class SQLite {
             pstmt.setString(3, username);
             pstmt.executeUpdate();
         } catch (Exception ex) {
-            System.out.println("updateLastLogin error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -486,7 +490,7 @@ public class SQLite {
             pstmt.setString(2, username);
             pstmt.executeUpdate();
         } catch (Exception ex) {
-            System.out.println("updateUserRole error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -501,7 +505,7 @@ public class SQLite {
             pstmt.setString(4, oldName);
             pstmt.executeUpdate();
         } catch (Exception ex) {
-            System.out.println("updateProduct error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -537,7 +541,7 @@ public class SQLite {
             conn.commit();
             return true;
         } catch (Exception ex) {
-            System.out.println("purchaseProduct error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
         return false;
     }
@@ -555,7 +559,7 @@ public class SQLite {
             pstmt.setString(2, username);
             pstmt.executeUpdate();
         } catch (Exception ex) {
-            System.out.println("setUserLocked error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -569,9 +573,9 @@ public class SQLite {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
             pstmt.executeUpdate();
-            System.out.println("User " + username + " has been deleted.");
+            LOGGER.log(Level.INFO, "User removed");
         } catch (Exception ex) {
-            System.out.println("removeUser error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 
@@ -582,7 +586,7 @@ public class SQLite {
             pstmt.setString(1, name);
             pstmt.executeUpdate();
         } catch (Exception ex) {
-            System.out.println("removeProduct error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
     }
 }

@@ -188,33 +188,68 @@ public class Frame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void adminBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adminBtnActionPerformed
-        if (!canAccessRoleHome(ROLE_ADMIN)) return;
-        adminHomePnl.showPnl("home");
-        contentView.show(Content, "adminHomePnl");
+        try {
+            if (!canAccessRoleHome(ROLE_ADMIN)) return;
+            adminHomePnl.showPnl("home");
+            contentView.show(Content, "adminHomePnl");
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            sessionUser = null;
+            loginNav();
+        }
     }//GEN-LAST:event_adminBtnActionPerformed
 
     private void managerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_managerBtnActionPerformed
-        if (!canAccessRoleHome(ROLE_MANAGER)) return;
-        managerHomePnl.showPnl("home");
-        contentView.show(Content, "managerHomePnl");
+        try {
+            if (!canAccessRoleHome(ROLE_MANAGER)) return;
+            managerHomePnl.showPnl("home");
+            contentView.show(Content, "managerHomePnl");
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            sessionUser = null;
+            loginNav();
+        }
     }//GEN-LAST:event_managerBtnActionPerformed
 
     private void staffBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_staffBtnActionPerformed
-        if (!canAccessRoleHome(ROLE_STAFF)) return;
-        staffHomePnl.showPnl("home");
-        contentView.show(Content, "staffHomePnl");
+        try {
+            if (!canAccessRoleHome(ROLE_STAFF)) return;
+            staffHomePnl.showPnl("home");
+            contentView.show(Content, "staffHomePnl");
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            sessionUser = null;
+            loginNav();
+        }
     }//GEN-LAST:event_staffBtnActionPerformed
 
     private void clientBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientBtnActionPerformed
-        if (!canAccessRoleHome(ROLE_CLIENT)) return;
-        clientHomePnl.showPnl("home");
-        contentView.show(Content, "clientHomePnl");
+        try {
+            if (!canAccessRoleHome(ROLE_CLIENT)) return;
+            clientHomePnl.showPnl("home");
+            contentView.show(Content, "clientHomePnl");
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            sessionUser = null;
+            loginNav();
+        }
     }//GEN-LAST:event_clientBtnActionPerformed
 
     private void logoutBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logoutBtnActionPerformed
-        sessionUser = null;
-        configureNavigationForRole(0);
-        frameView.show(Container, "loginPnl");
+        try {
+            sessionUser = null;
+            configureNavigationForRole(0);
+            frameView.show(Container, "loginPnl");
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            sessionUser = null;
+            configureNavigationForRole(0);
+            frameView.show(Container, "loginPnl");
+        }
     }//GEN-LAST:event_logoutBtnActionPerformed
 
     public Main main;

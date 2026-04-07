@@ -169,6 +169,7 @@ public class Register extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
+        try {
         String username = usernameFld.getText().trim();
         String password = new String(passwordFld.getPassword());
         String confpass = new String(confpassFld.getPassword());
@@ -214,12 +215,20 @@ public class Register extends javax.swing.JPanel {
         confpassFld.setText("");
         usernameFld.setText("");
         frame.loginNav();
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_registerBtnActionPerformed
 
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
-        passwordFld.setText("");
-        confpassFld.setText("");
-        frame.loginNav();
+        try {
+            passwordFld.setText("");
+            confpassFld.setText("");
+            frame.loginNav();
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+        }
     }//GEN-LAST:event_backBtnActionPerformed
 
 

@@ -149,35 +149,59 @@ public class ClientHome extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void usersBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_usersBtnActionPerformed
-        if (!isClient()) return;
-        mgmtUser.init();
-        usersBtn.setForeground(Color.red); productsBtn.setForeground(Color.black);
-        historyBtn.setForeground(Color.black); logsBtn.setForeground(Color.black);
-        contentView.show(Content, "mgmtUser");
+        try {
+            if (!isClient()) return;
+            mgmtUser.init();
+            usersBtn.setForeground(Color.red); productsBtn.setForeground(Color.black);
+            historyBtn.setForeground(Color.black); logsBtn.setForeground(Color.black);
+            contentView.show(Content, "mgmtUser");
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
+        }
     }//GEN-LAST:event_usersBtnActionPerformed
 
     private void productsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productsBtnActionPerformed
-        if (!isClient()) return;
-        mgmtProduct.init();
-        usersBtn.setForeground(Color.black); productsBtn.setForeground(Color.red);
-        historyBtn.setForeground(Color.black); logsBtn.setForeground(Color.black);
-        contentView.show(Content, "mgmtProduct");
+        try {
+            if (!isClient()) return;
+            mgmtProduct.init();
+            usersBtn.setForeground(Color.black); productsBtn.setForeground(Color.red);
+            historyBtn.setForeground(Color.black); logsBtn.setForeground(Color.black);
+            contentView.show(Content, "mgmtProduct");
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
+        }
     }//GEN-LAST:event_productsBtnActionPerformed
 
     private void historyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_historyBtnActionPerformed
-        if (!isClient()) return;
-        mgmtHistory.init();
-        usersBtn.setForeground(Color.black); productsBtn.setForeground(Color.black);
-        historyBtn.setForeground(Color.red); logsBtn.setForeground(Color.black);
-        contentView.show(Content, "mgmtHistory");
+        try {
+            if (!isClient()) return;
+            mgmtHistory.init();
+            usersBtn.setForeground(Color.black); productsBtn.setForeground(Color.black);
+            historyBtn.setForeground(Color.red); logsBtn.setForeground(Color.black);
+            contentView.show(Content, "mgmtHistory");
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
+        }
     }//GEN-LAST:event_historyBtnActionPerformed
 
     private void logsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logsBtnActionPerformed
-        if (!isClient()) return;
-        mgmtLogs.init();
-        usersBtn.setForeground(Color.black); productsBtn.setForeground(Color.black);
-        historyBtn.setForeground(Color.black); logsBtn.setForeground(Color.red);
-        contentView.show(Content, "mgmtLogs");
+        try {
+            if (!isClient()) return;
+            mgmtLogs.init();
+            usersBtn.setForeground(Color.black); productsBtn.setForeground(Color.black);
+            historyBtn.setForeground(Color.black); logsBtn.setForeground(Color.red);
+            contentView.show(Content, "mgmtLogs");
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
+        }
     }//GEN-LAST:event_logsBtnActionPerformed
 
     private boolean isClient() {

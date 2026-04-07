@@ -140,15 +140,27 @@ public class MgmtLogs extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void clearBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearBtnActionPerformed
-        
+        try {
+            // placeholder for future clear functionality
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
+        }
     }//GEN-LAST:event_clearBtnActionPerformed
 
     private void debugBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_debugBtnActionPerformed
-        if (!isAdmin()) return;
-        if(sqlite.DEBUG_MODE == 1)
-            sqlite.DEBUG_MODE = 0;
-        else
-            sqlite.DEBUG_MODE = 1;
+        try {
+            if (!isAdmin()) return;
+            if(sqlite.DEBUG_MODE == 1)
+                sqlite.DEBUG_MODE = 0;
+            else
+                sqlite.DEBUG_MODE = 1;
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            javax.swing.JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
+        }
     }//GEN-LAST:event_debugBtnActionPerformed
 
     private boolean isAdmin() {

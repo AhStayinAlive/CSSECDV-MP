@@ -46,7 +46,7 @@ public class Logs {
         try {
             this.timestamp = new Timestamp(dateformat.parse(timestamp).getTime());
         } catch (ParseException ex) {
-            System.out.println("Logs timestamp parse error: " + ex.getMessage());
+            java.util.logging.Logger.getLogger(Logs.class.getName()).log(java.util.logging.Level.WARNING, "Timestamp parse failed", ex);
         }
     }
 

@@ -125,6 +125,7 @@ public class Login extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void loginBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginBtnActionPerformed
+        try {
         // Step 1 — read field values; trim username, never trim password
         String username        = usernameFld.getText().trim();
         String enteredPassword = new String(passwordFld.getPassword());
@@ -203,6 +204,10 @@ public class Login extends javax.swing.JPanel {
 
         // Navigate — mainNav stores sessionUser and routes to the correct role panel
         frame.mainNav(updatedUser, prevTimestamp, prevStatus);
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_loginBtnActionPerformed
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed

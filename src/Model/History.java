@@ -39,7 +39,7 @@ public class History {
         try {
             this.timestamp = new Timestamp(dateformat.parse(timestamp).getTime());
         } catch (ParseException ex) {
-            System.out.println("History timestamp parse error: " + ex.getMessage());
+            java.util.logging.Logger.getLogger(History.class.getName()).log(java.util.logging.Level.WARNING, "Timestamp parse failed", ex);
         }
     }
 

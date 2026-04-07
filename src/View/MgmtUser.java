@@ -212,119 +212,143 @@ public class MgmtUser extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void editRoleBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editRoleBtnActionPerformed
-        if (!isAdmin()) return;
-        if (table.getSelectedRow() < 0) return;
+        try {
+            if (!isAdmin()) return;
+            if (table.getSelectedRow() < 0) return;
 
-        if (!reAuthenticate()) return;
+            if (!reAuthenticate()) return;
 
-        String[] options = {"1-DISABLED", "2-CLIENT", "3-STAFF", "4-MANAGER", "5-ADMIN"};
-        int currentRole  = (int) tableModel.getValueAt(table.getSelectedRow(), 2);
-        String targetUser = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
+            String[] options = {"1-DISABLED", "2-CLIENT", "3-STAFF", "4-MANAGER", "5-ADMIN"};
+            int currentRole  = (int) tableModel.getValueAt(table.getSelectedRow(), 2);
+            String targetUser = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
 
-        String result = (String) JOptionPane.showInputDialog(null,
-                "USER: " + targetUser,
-                "EDIT USER ROLE",
-                JOptionPane.QUESTION_MESSAGE,
-                null, options, options[currentRole - 1]);
+            String result = (String) JOptionPane.showInputDialog(null,
+                    "USER: " + targetUser,
+                    "EDIT USER ROLE",
+                    JOptionPane.QUESTION_MESSAGE,
+                    null, options, options[currentRole - 1]);
 
-        if (result != null) {
-            int newRole = Character.getNumericValue(result.charAt(0));
-            
-            if (newRole < 1 || newRole > 5) {
-                JOptionPane.showMessageDialog(this,
-                    "Invalid role code. Role must be an integer between 1 and 5.",
-                    "Validation Error", JOptionPane.ERROR_MESSAGE);
-                return; // Reject the input and stop execution
+            if (result != null) {
+                int newRole = Character.getNumericValue(result.charAt(0));
+
+                if (newRole < 1 || newRole > 5) {
+                    JOptionPane.showMessageDialog(this,
+                        "Invalid role code. Role must be an integer between 1 and 5.",
+                        "Validation Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                sqlite.updateUserRole(targetUser, newRole);
+                init();
             }
-
-            sqlite.updateUserRole(targetUser, newRole);
-            init();
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
         }
     }//GEN-LAST:event_editRoleBtnActionPerformed
 
     private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
-        if (!isAdmin()) return;
-        if (table.getSelectedRow() < 0) return;
+        try {
+            if (!isAdmin()) return;
+            if (table.getSelectedRow() < 0) return;
 
-        String targetUser = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
+            String targetUser = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
 
-        int confirm = JOptionPane.showConfirmDialog(null,
-                "Are you sure you want to delete " + targetUser + "?",
-                "DELETE USER", JOptionPane.YES_NO_OPTION);
-        if (confirm != JOptionPane.YES_OPTION) return;
+            int confirm = JOptionPane.showConfirmDialog(null,
+                    "Are you sure you want to delete " + targetUser + "?",
+                    "DELETE USER", JOptionPane.YES_NO_OPTION);
+            if (confirm != JOptionPane.YES_OPTION) return;
 
-        if (!reAuthenticate()) return;
+            if (!reAuthenticate()) return;
 
-        sqlite.removeUser(targetUser);
-        init();
+            sqlite.removeUser(targetUser);
+            init();
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
+        }
     }//GEN-LAST:event_deleteBtnActionPerformed
 
     private void lockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockBtnActionPerformed
-        if (!isAdmin()) return;
-        if (table.getSelectedRow() < 0) return;
+        try {
+            if (!isAdmin()) return;
+            if (table.getSelectedRow() < 0) return;
 
-        String targetUser  = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
-        Object lockedObj   = tableModel.getValueAt(table.getSelectedRow(), 3);
-        int currentLocked  = (lockedObj instanceof Integer)
-                ? (Integer) lockedObj
-                : Integer.parseInt(lockedObj.toString());
-        String action      = (currentLocked == 1) ? "unlock" : "lock";
+            String targetUser  = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
+            Object lockedObj   = tableModel.getValueAt(table.getSelectedRow(), 3);
+            int currentLocked  = (lockedObj instanceof Integer)
+                    ? (Integer) lockedObj
+                    : Integer.parseInt(lockedObj.toString());
+            String action      = (currentLocked == 1) ? "unlock" : "lock";
 
-        int confirm = JOptionPane.showConfirmDialog(null,
-                "Are you sure you want to " + action + " " + targetUser + "?",
-                "LOCK/UNLOCK USER", JOptionPane.YES_NO_OPTION);
-        if (confirm != JOptionPane.YES_OPTION) return;
+            int confirm = JOptionPane.showConfirmDialog(null,
+                    "Are you sure you want to " + action + " " + targetUser + "?",
+                    "LOCK/UNLOCK USER", JOptionPane.YES_NO_OPTION);
+            if (confirm != JOptionPane.YES_OPTION) return;
 
-        if (!reAuthenticate()) return;
+            if (!reAuthenticate()) return;
 
-        sqlite.setUserLocked(targetUser, currentLocked == 1 ? 0 : 1);
-        init();
+            sqlite.setUserLocked(targetUser, currentLocked == 1 ? 0 : 1);
+            init();
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
+        }
     }//GEN-LAST:event_lockBtnActionPerformed
 
     private void chgpassBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chgpassBtnActionPerformed
-        if (!isAdmin()) return;
-        if (table.getSelectedRow() < 0) return;
+        try {
+            if (!isAdmin()) return;
+            if (table.getSelectedRow() < 0) return;
 
-        String targetUser = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
+            String targetUser = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
 
-        if (!reAuthenticate()) return;
+            if (!reAuthenticate()) return;
 
-        JPasswordField newPassFld  = new JPasswordField();
-        JPasswordField confPassFld = new JPasswordField();
-        designer(newPassFld,  "NEW PASSWORD");
-        designer(confPassFld, "CONFIRM PASSWORD");
+            JPasswordField newPassFld  = new JPasswordField();
+            JPasswordField confPassFld = new JPasswordField();
+            designer(newPassFld,  "NEW PASSWORD");
+            designer(confPassFld, "CONFIRM PASSWORD");
 
-        int result = JOptionPane.showConfirmDialog(null,
-                new Object[]{"Enter new password for " + targetUser + ":", newPassFld, confPassFld},
-                "CHANGE PASSWORD",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE);
+            int result = JOptionPane.showConfirmDialog(null,
+                    new Object[]{"Enter new password for " + targetUser + ":", newPassFld, confPassFld},
+                    "CHANGE PASSWORD",
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.PLAIN_MESSAGE);
 
-        if (result != JOptionPane.OK_OPTION) return;
+            if (result != JOptionPane.OK_OPTION) return;
 
-        String newPass  = new String(newPassFld.getPassword());
-        String confPass = new String(confPassFld.getPassword());
+            String newPass  = new String(newPassFld.getPassword());
+            String confPass = new String(confPassFld.getPassword());
 
-        if (!Register.isValidPassword(newPass)) {
+            if (!Register.isValidPassword(newPass)) {
+                JOptionPane.showMessageDialog(this,
+                        "Password must be 8\u201364 characters and contain uppercase, lowercase, digit, and special character.",
+                        "Password Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (!newPass.equals(confPass)) {
+                JOptionPane.showMessageDialog(this,
+                        "Passwords do not match.",
+                        "Password Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            String hashed = BCrypt.hashpw(newPass, BCrypt.gensalt(12));
+            sqlite.updatePassword(targetUser, hashed);
             JOptionPane.showMessageDialog(this,
-                    "Password must be 8–64 characters and contain uppercase, lowercase, digit, and special character.",
-                    "Password Error", JOptionPane.ERROR_MESSAGE);
-            return;
+                    "Password updated successfully.",
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
+            init();
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
+            JOptionPane.showMessageDialog(this, "An error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            if (frame != null) { frame.sessionUser = null; frame.loginNav(); }
         }
-
-        if (!newPass.equals(confPass)) {
-            JOptionPane.showMessageDialog(this,
-                    "Passwords do not match.",
-                    "Password Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        String hashed = BCrypt.hashpw(newPass, BCrypt.gensalt(12));
-        sqlite.updatePassword(targetUser, hashed);
-        JOptionPane.showMessageDialog(this,
-                "Password updated successfully.",
-                "Success", JOptionPane.INFORMATION_MESSAGE);
-        init();
     }//GEN-LAST:event_chgpassBtnActionPerformed
 
     private boolean isAdmin() {
