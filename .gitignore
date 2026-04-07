@@ -1,0 +1,10 @@
+# NetBeans build output
+build/
+dist/
+nbproject/private/
+
+# Database (runtime file, not source)
+database.db
+
+# MacOS
+.DS_Store
