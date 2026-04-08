@@ -27,29 +27,35 @@ public class MgmtLogs extends javax.swing.JPanel {
         this.frame = frame;
         tableModel = (DefaultTableModel)table.getModel();
         table.getTableHeader().setFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, 14));
+        init();
     }
 
-    public void init(){
+    public void init() {
         if (frame == null || !frame.canAccessRoleHome(Frame.ROLE_ADMIN)) {
             clearBtn.setVisible(false);
             debugBtn.setVisible(false);
             return;
         }
+
         clearBtn.setVisible(true);
         debugBtn.setVisible(true);
-        //      CLEAR TABLE
-        for(int nCtr = tableModel.getRowCount(); nCtr > 0; nCtr--){
-            tableModel.removeRow(0);
-        }
-        
-//      LOAD CONTENTS
-        ArrayList<Logs> logs = sqlite.getLogs();
-        for(int nCtr = 0; nCtr < logs.size(); nCtr++){
-            tableModel.addRow(new Object[]{
-                logs.get(nCtr).getEvent(), 
-                logs.get(nCtr).getUsername(), 
-                logs.get(nCtr).getDesc(), 
-                logs.get(nCtr).getTimestamp()});
+
+        // Clear table safely
+        tableModel.setRowCount(0);
+
+        // Fetch all logs
+        ArrayList<Logs> logs = sqlite.getLogsFiltered();  // <- ensure this returns data
+
+        if (logs != null && !logs.isEmpty()) {
+            for (Logs log : logs) {
+                tableModel.addRow(new Object[]{
+                    log.getEvent(),
+                    log.getUsername(),
+                    log.getDesc(),       // keeps your 'desc' column
+                    log.getTimestamp(),
+                    log.getLevel()
+                });
+            }
         }
     }
     /**

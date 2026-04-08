@@ -221,9 +221,6 @@ public class MgmtProduct extends javax.swing.JPanel {
                     String ts = LocalDateTime.now().format(TS_FMT);
                     sqlite.addHistory(username, productName, quantity, ts);
                     sqlite.addLogs("NOTICE", username, "Purchased " + quantity + " x " + productName, ts);
-                    if (sqlite.DEBUG_MODE == 1) {
-                        sqlite.addLogs("PURCHASE_DETAIL", username, "Detailed purchase: " + quantity + " x " + productName + " at " + ts, ts);
-                    }
                     JOptionPane.showMessageDialog(this, "Purchase successful.", "Success", JOptionPane.INFORMATION_MESSAGE);
                     init();
                 }

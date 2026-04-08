@@ -1,62 +1,67 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Model;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-/**
- *
- * @author beepxD
- */
 public class Logs {
-    
+
     private int id;
     private String event;
     private String username;
-    private String desc;
+    private String desc;  // keep as-is
     private Timestamp timestamp;
+    private String level; // new field
 
-    private SimpleDateFormat dateformatNoMillis = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private SimpleDateFormat dateformatWithMillis = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-    
-    public Logs(String event, String desc){
+    private static final SimpleDateFormat DATE_FORMAT_NO_MILLIS = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final SimpleDateFormat DATE_FORMAT_WITH_MILLIS = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+    public Logs(int id, String event, String username, String desc, String timestamp) {
+    this(id, event, username, desc, timestamp, "INFO");
+    }
+
+    // Constructor with default level INFO
+    public Logs(String event, String username, String desc) {
+        this(event, username, desc, "INFO");
+    }
+
+    // Constructor with specified level
+    public Logs(String event, String username, String desc, String level) {
         this.event = event;
-        this.username = "NONE";
+        this.username = username != null ? username : "NONE";
         this.desc = desc;
+        this.level = level != null ? level : "INFO";
         this.timestamp = new Timestamp(new Date().getTime());
     }
-    
-    public Logs(String event, String username, String desc){
-        this.event = event;
-        this.username = username;
-        this.desc = desc;
-        this.timestamp = new Timestamp(new Date().getTime());
-    }
-    
-    public Logs(int id, String event, String username, String desc, String timestamp){
+
+    // Constructor with ID and timestamp string (for DB)
+    public Logs(int id, String event, String username, String desc, String timestamp, String level) {
         this.id = id;
         this.event = event;
-        this.username = username;
+        this.username = username != null ? username : "NONE";
         this.desc = desc;
         this.timestamp = parseTimestamp(timestamp);
+        this.level = level != null ? level : "INFO";
     }
 
     private Timestamp parseTimestamp(String timestamp) {
         try {
             if (timestamp != null && timestamp.contains(".")) {
-                return new Timestamp(dateformatWithMillis.parse(timestamp).getTime());
+                return new Timestamp(DATE_FORMAT_WITH_MILLIS.parse(timestamp).getTime());
             }
-            return new Timestamp(dateformatNoMillis.parse(timestamp).getTime());
+            return new Timestamp(DATE_FORMAT_NO_MILLIS.parse(timestamp).getTime());
         } catch (ParseException ex) {
-            java.util.logging.Logger.getLogger(Logs.class.getName()).log(java.util.logging.Level.WARNING, "Timestamp parse failed", ex);
+            Logger.getLogger(Logs.class.getName()).log(Level.WARNING, "Timestamp parse failed, using current time", ex);
             return new Timestamp(new Date().getTime());
         }
+    }
+
+    // Getters and Setters
+    public int getId() {
+        return id;
     }
 
     public void setId(int id) {
@@ -94,5 +99,12 @@ public class Logs {
     public void setTimestamp(Timestamp timestamp) {
         this.timestamp = timestamp;
     }
-    
+
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
+    }
 }

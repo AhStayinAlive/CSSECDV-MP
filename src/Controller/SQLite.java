@@ -60,16 +60,17 @@ public class SQLite {
 
     public void createLogsTable() {
         String sql = "CREATE TABLE IF NOT EXISTS logs (\n"
-            + " id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-            + " event TEXT NOT NULL,\n"
-            + " username TEXT NOT NULL,\n"
-            + " desc TEXT NOT NULL,\n"
-            + " timestamp TEXT NOT NULL\n"
-            + ");";
+                + " id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+                + " event TEXT NOT NULL,\n"
+                + " username TEXT NOT NULL,\n"
+                + " \"desc\" TEXT NOT NULL,\n"      // quotes to allow reserved word
+                + " timestamp TEXT NOT NULL,\n"
+                + " level TEXT NOT NULL DEFAULT 'INFO'\n"
+                + ");";
         try (Connection conn = DriverManager.getConnection(driverURL);
-             Statement stmt = conn.createStatement()) {
+            Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
-            LOGGER.log(Level.INFO, "Table initialized");
+            LOGGER.log(Level.INFO, "Logs table initialized");
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
@@ -204,14 +205,52 @@ public class SQLite {
         }
     }
 
+    // -----------------------------
+// ADD LOG ENTRY
+// -----------------------------
     public void addLogs(String event, String username, String desc, String timestamp) {
-        String sql = "INSERT INTO logs(event,username,desc,timestamp) VALUES(?,?,?,?)";
+        String level;
+
+        // Assign log level based on event type
+        switch (event.toUpperCase()) {
+
+            // DEBUG
+            case "DEBUG_MODE":
+                level = "DEBUG";
+                break;
+
+            // WARNINGS
+            case "VALIDATION_FAILURE":
+            case "ACCOUNT_LOCKED":
+            case "LOGIN_FAILURE":
+            case "LOGIN_FAILED":
+                level = "WARNING";
+                break;
+
+            // ERRORS
+            case "ERROR":
+            case "EXCEPTION":
+            case "SYSTEM_CRASH":
+            case "DATABASE_ERROR":
+                level = "ERROR";
+                break;
+
+            // Everything else
+            default:
+                level = "INFO";
+                break;
+        }
+
+        // Use quotes around "desc" to avoid reserved word issues
+        String sql = "INSERT INTO logs(event, username, \"desc\", timestamp, level) VALUES(?,?,?,?,?)";
+
         try (Connection conn = DriverManager.getConnection(driverURL);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, event);
             pstmt.setString(2, username);
             pstmt.setString(3, desc);
             pstmt.setString(4, timestamp);
+            pstmt.setString(5, level);
             pstmt.executeUpdate();
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Database operation failed", ex);
@@ -310,24 +349,32 @@ public class SQLite {
         return histories;
     }
 
+        // -----------------------------
+    // GET ALL LOGS
+    // -----------------------------
     public ArrayList<Logs> getLogs() {
-        String sql = "SELECT id, event, username, desc, timestamp FROM logs";
+        String sql = "SELECT id, event, username, \"desc\", timestamp, level FROM logs";
         ArrayList<Logs> logs = new ArrayList<>();
         try (Connection conn = DriverManager.getConnection(driverURL);
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            ResultSet rs = pstmt.executeQuery()) {
+
             while (rs.next()) {
-                logs.add(new Logs(rs.getInt("id"),
-                        rs.getString("event"),
-                        rs.getString("username"),
-                        rs.getString("desc"),
-                        rs.getString("timestamp")));
+                logs.add(new Logs(
+                    rs.getInt("id"),
+                    rs.getString("event"),
+                    rs.getString("username"),
+                    rs.getString("desc"),     // matches the quoted column
+                    rs.getString("timestamp"),
+                    rs.getString("level")
+                ));
             }
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
         return logs;
     }
+    
 
     public void clearLogs() {
         String sql = "DELETE FROM logs";
@@ -619,5 +666,38 @@ public class SQLite {
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Database operation failed", ex);
         }
+    }
+
+   public ArrayList<Logs> getLogsFiltered() {
+        ArrayList<Logs> logs = new ArrayList<>();
+
+        // Use "desc" in quotes to avoid SQLite reserved keyword issues
+        String query;
+        if (DEBUG_MODE == 1) {
+            query = "SELECT id, event, username, \"desc\" AS description, timestamp, level FROM logs ORDER BY timestamp ASC";
+        } else {
+            query = "SELECT id, event, username, \"desc\" AS description, timestamp, level FROM logs WHERE level IN ('WARNING','ERROR') ORDER BY timestamp ASC";
+        }
+
+        try (Connection conn = DriverManager.getConnection(driverURL);
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                logs.add(new Logs(
+                    rs.getInt("id"),
+                    rs.getString("event"),
+                    rs.getString("username"),
+                    rs.getString("description"), // mapped alias for desc
+                    rs.getString("timestamp"),
+                    rs.getString("level")  
+                ));
+            }
+
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Database operation failed", ex);
+        }
+
+        return logs;
     }
 }
