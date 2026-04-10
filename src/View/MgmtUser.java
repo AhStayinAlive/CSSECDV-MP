@@ -2,6 +2,9 @@ package View;
 
 import Controller.SQLite;
 import Model.User;
+
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
@@ -15,6 +18,8 @@ public class MgmtUser extends javax.swing.JPanel {
     public SQLite sqlite;
     public DefaultTableModel tableModel;
     public Frame frame;
+    private static final DateTimeFormatter TS_FMT =
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public MgmtUser(SQLite sqlite, Frame frame) {
         initComponents();
@@ -239,6 +244,13 @@ public class MgmtUser extends javax.swing.JPanel {
                 }
 
                 sqlite.updateUserRole(targetUser, newRole);
+
+                sqlite.addLogs(
+                    "USER_ROLE_UPDATE",
+                    frame.sessionUser.getUsername(),
+                    "Updated role for user: " + targetUser + " to role " + newRole,
+                    LocalDateTime.now().format(TS_FMT)
+            );
                 init();
             }
         } catch (Exception ex) {
@@ -263,6 +275,12 @@ public class MgmtUser extends javax.swing.JPanel {
             if (!reAuthenticate()) return;
 
             sqlite.removeUser(targetUser);
+            sqlite.addLogs(
+                    "USER_DELETE",
+                    frame.sessionUser.getUsername(),
+                    "Deleted user: " + targetUser,
+                    LocalDateTime.now().format(TS_FMT)
+            );
             init();
         } catch (Exception ex) {
             java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
@@ -291,6 +309,16 @@ public class MgmtUser extends javax.swing.JPanel {
             if (!reAuthenticate()) return;
 
             sqlite.setUserLocked(targetUser, currentLocked == 1 ? 0 : 1);
+            
+            String actionLog = (currentLocked == 1) ? "UNLOCK_USER" : "LOCK_USER";
+
+            sqlite.addLogs(
+                    actionLog,
+                    frame.sessionUser.getUsername(),
+                    (currentLocked == 1 ? "Unlocked " : "Locked ") + "user: " + targetUser,
+                    LocalDateTime.now().format(TS_FMT)
+            );
+            
             init();
         } catch (Exception ex) {
             java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Unexpected error", ex);
@@ -340,6 +368,14 @@ public class MgmtUser extends javax.swing.JPanel {
 
             String hashed = BCrypt.hashpw(newPass, BCrypt.gensalt(12));
             sqlite.updatePassword(targetUser, hashed);
+
+            sqlite.addLogs(
+                    "ADMIN_PASSWORD_CHANGE",
+                    frame.sessionUser.getUsername(),
+                    "Changed password for user: " + targetUser,
+                    LocalDateTime.now().format(TS_FMT)
+            );
+
             JOptionPane.showMessageDialog(this,
                     "Password updated successfully.",
                     "Success", JOptionPane.INFORMATION_MESSAGE);

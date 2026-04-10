@@ -162,6 +162,13 @@ public class Login extends javax.swing.JPanel {
 
         // // Step 5 — check if the account is disabled or manually locked
         if (user.getRole() == Frame.ROLE_DISABLED || user.getLocked() == 1) {
+            frame.main.sqlite.addLogs(
+                    "ACCOUNT_LOCKED",
+                    user.getUsername(),
+                    "Login blocked: account is disabled or locked",
+                    LocalDateTime.now().format(TS_FMT)
+            );
+
             JOptionPane.showMessageDialog(this,
                     "This account has been disabled. Please contact the administrator.",
                     "Account Disabled", JOptionPane.ERROR_MESSAGE);

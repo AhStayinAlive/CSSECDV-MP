@@ -224,6 +224,7 @@ public class SQLite {
             case "ACCOUNT_LOCKED":
             case "LOGIN_FAILURE":
             case "LOGIN_FAILED":
+            case "PURCHASE_FAILED":
                 level = "WARNING";
                 break;
 
@@ -241,7 +242,6 @@ public class SQLite {
                 break;
         }
 
-        // Use quotes around "desc" to avoid reserved word issues
         String sql = "INSERT INTO logs(event, username, \"desc\", timestamp, level) VALUES(?,?,?,?,?)";
 
         try (Connection conn = DriverManager.getConnection(driverURL);

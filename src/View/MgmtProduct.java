@@ -206,14 +206,32 @@ public class MgmtProduct extends javax.swing.JPanel {
                     int quantity;
                     try {
                         quantity = Integer.parseInt(purchaseStr);
-                        if (quantity <= 0) throw new NumberFormatException();
+                        if (quantity <= 0) {
+                            sqlite.addLogs("VALIDATION_FAILURE",
+                                    frame.sessionUser.getUsername(),
+                                    "PURCHASE failed: quantity <= 0 (" + quantity + ")",
+                                    LocalDateTime.now().format(TS_FMT));
+
+                            throw new NumberFormatException();
+                        }
                     } catch (NumberFormatException e) {
+
+                        sqlite.addLogs("VALIDATION_FAILURE",
+                        frame.sessionUser.getUsername(),
+                        "PURCHASE failed: invalid quantity input = " + purchaseStr,
+                        LocalDateTime.now().format(TS_FMT));
                         JOptionPane.showMessageDialog(this, "Invalid Quantity. You must enter a positive whole number greater than 0.", "Validation Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                     String productName = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
                     boolean purchased = sqlite.purchaseProduct(productName, quantity);
                     if (!purchased) {
+                        sqlite.addLogs(
+                            "PURCHASE_FAILED",
+                            frame.sessionUser.getUsername(),
+                            "Product out of stock or insufficient quantity",
+                            LocalDateTime.now().format(TS_FMT)
+                        );
                         JOptionPane.showMessageDialog(this, "Purchase failed. Product may be out of stock.", "Purchase Failed", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
@@ -258,6 +276,10 @@ public class MgmtProduct extends javax.swing.JPanel {
                 String priceStr = priceFld.getText().trim();
 
                 if (!name.matches("^[a-zA-Z0-9 -]{1,50}$")) {
+                    sqlite.addLogs("VALIDATION_FAILURE",
+                        frame.sessionUser.getUsername(),
+                        "ADD_PRODUCT failed: invalid product name = " + name,
+                        LocalDateTime.now().format(TS_FMT));
                     JOptionPane.showMessageDialog(this, "Invalid Product Name. Only letters, numbers, spaces, and hyphens allowed.", "Validation Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
@@ -267,8 +289,20 @@ public class MgmtProduct extends javax.swing.JPanel {
                 try {
                     stock = Integer.parseInt(stockStr);
                     price = Double.parseDouble(priceStr);
-                    if (stock < 0 || price < 0) throw new NumberFormatException();
+                    if (stock < 0 || price < 0) {
+                        sqlite.addLogs("VALIDATION_FAILURE",
+                                frame.sessionUser.getUsername(),
+                                "Negative values rejected: stock=" + stock + ", price=" + price,
+                                LocalDateTime.now().format(TS_FMT));
+
+                        throw new NumberFormatException();
+                    }
                 } catch (NumberFormatException e) {
+                    sqlite.addLogs("VALIDATION_FAILURE",
+                    frame.sessionUser.getUsername(),
+                    "ADD/EDIT_PRODUCT failed: invalid stock or price input. stock="
+                            + stockStr + ", price=" + priceStr,
+                    LocalDateTime.now().format(TS_FMT));
                     JOptionPane.showMessageDialog(this, "Invalid Input. Stock must be a whole number and Price must be a valid positive amount.", "Validation Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
@@ -312,6 +346,10 @@ public class MgmtProduct extends javax.swing.JPanel {
                     String priceStr = priceFld.getText().trim();
 
                     if (!name.matches("^[a-zA-Z0-9 -]{1,50}$")) {
+                        sqlite.addLogs("VALIDATION_FAILURE",
+                        frame.sessionUser.getUsername(),
+                        "ADD_PRODUCT failed: invalid product name = " + name,
+                        LocalDateTime.now().format(TS_FMT));
                         JOptionPane.showMessageDialog(this, "Invalid Product Name. Only letters, numbers, spaces, and hyphens allowed.", "Validation Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
@@ -323,6 +361,11 @@ public class MgmtProduct extends javax.swing.JPanel {
                         price = Double.parseDouble(priceStr);
                         if (stock < 0 || price < 0) throw new NumberFormatException();
                     } catch (NumberFormatException e) {
+                        sqlite.addLogs("VALIDATION_FAILURE",
+                            frame.sessionUser.getUsername(),
+                            "ADD/EDIT_PRODUCT failed: invalid stock or price input. stock="
+                                    + stockStr + ", price=" + priceStr,
+                            LocalDateTime.now().format(TS_FMT));
                         JOptionPane.showMessageDialog(this, "Invalid Input. Stock must be a whole number and Price must be a valid positive amount.", "Validation Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
