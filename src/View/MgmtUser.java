@@ -78,6 +78,13 @@ public class MgmtUser extends javax.swing.JPanel {
      */
     private boolean reAuthenticate() {
         if (frame == null || frame.sessionUser == null) {
+                    sqlite.addLogs(
+                "AUTHENTICATION_FAILURE",
+                "SYSTEM",
+                "No active session found during attempt.",
+                LocalDateTime.now().format(TS_FMT)
+            );
+
             JOptionPane.showMessageDialog(this,
                     "No active session found.",
                     "Authentication Error", JOptionPane.ERROR_MESSAGE);
@@ -97,6 +104,13 @@ public class MgmtUser extends javax.swing.JPanel {
 
         String entered = new String(reAuthPass.getPassword());
         if (entered.isEmpty()) {
+                sqlite.addLogs(
+                "VALIDATION_FAILURE",
+                frame.sessionUser.getUsername(),
+                "Empty password entered during re-authentication",
+                LocalDateTime.now().format(TS_FMT)
+            );
+
             JOptionPane.showMessageDialog(this,
                     "Password cannot be empty.",
                     "Authentication Failed", JOptionPane.ERROR_MESSAGE);
@@ -104,6 +118,12 @@ public class MgmtUser extends javax.swing.JPanel {
         }
 
         if (!BCrypt.checkpw(entered, frame.sessionUser.getPassword())) {
+            sqlite.addLogs(
+                "AUTHENTICATION_FAILURE",
+                frame.sessionUser.getUsername(),
+                "Incorrect password during re-authentication",
+                LocalDateTime.now().format(TS_FMT)
+            );
             JOptionPane.showMessageDialog(this,
                     "Incorrect password. Operation cancelled.",
                     "Authentication Failed", JOptionPane.ERROR_MESSAGE);
@@ -237,6 +257,13 @@ public class MgmtUser extends javax.swing.JPanel {
                 int newRole = Character.getNumericValue(result.charAt(0));
 
                 if (newRole < 1 || newRole > 5) {
+                    sqlite.addLogs(
+                        "VALIDATION_FAILURE",
+                        frame.sessionUser.getUsername(),
+                        "Invalid role input: " + newRole + " (must be 1–5)",
+                        LocalDateTime.now().format(TS_FMT)
+                    );
+
                     JOptionPane.showMessageDialog(this,
                         "Invalid role code. Role must be an integer between 1 and 5.",
                         "Validation Error", JOptionPane.ERROR_MESSAGE);
@@ -329,7 +356,15 @@ public class MgmtUser extends javax.swing.JPanel {
 
     private void chgpassBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chgpassBtnActionPerformed
         try {
-            if (frame == null || !frame.canAccessRoleHome(Frame.ROLE_ADMIN)) return;
+            if (frame == null || !frame.canAccessRoleHome(Frame.ROLE_ADMIN)) {
+                sqlite.addLogs(
+                    "AUTHORIZATION_FAILURE",
+                    (frame != null && frame.sessionUser != null) ? frame.sessionUser.getUsername() : "SYSTEM",
+                    "Unauthorized attempt to access change password feature",
+                    LocalDateTime.now().format(TS_FMT)
+                );
+                return;
+            }
             if (table.getSelectedRow() < 0) return;
 
             String targetUser = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
@@ -353,6 +388,13 @@ public class MgmtUser extends javax.swing.JPanel {
             String confPass = new String(confPassFld.getPassword());
 
             if (!Register.isValidPassword(newPass)) {
+                sqlite.addLogs(
+                    "VALIDATION_FAILURE",
+                    frame.sessionUser.getUsername(),
+                    "Password validation failed.",
+                    LocalDateTime.now().format(TS_FMT)
+                );
+
                 JOptionPane.showMessageDialog(this,
                         "Password must be 8\u201364 characters and contain uppercase, lowercase, digit, and special character.",
                         "Password Error", JOptionPane.ERROR_MESSAGE);
@@ -360,6 +402,12 @@ public class MgmtUser extends javax.swing.JPanel {
             }
 
             if (!newPass.equals(confPass)) {
+                sqlite.addLogs(
+                    "VALIDATION_FAILURE",
+                    frame.sessionUser.getUsername(),
+                    "Password do not match.",
+                    LocalDateTime.now().format(TS_FMT)
+                );
                 JOptionPane.showMessageDialog(this,
                         "Passwords do not match.",
                         "Password Error", JOptionPane.ERROR_MESSAGE);

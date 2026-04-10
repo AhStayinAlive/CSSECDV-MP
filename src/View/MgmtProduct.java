@@ -188,6 +188,12 @@ public class MgmtProduct extends javax.swing.JPanel {
     private void purchaseBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_purchaseBtnActionPerformed
         try {
             if (!canPurchase()) {
+                sqlite.addLogs(
+                    "ACCESS_DENIED",
+                    frame.sessionUser.getUsername(),
+                    "Attempted to purchase product without client privileges",
+                    LocalDateTime.now().format(TS_FMT)
+                );
                 JOptionPane.showMessageDialog(this, "Only clients can purchase products.", "Access Denied", JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -222,7 +228,7 @@ public class MgmtProduct extends javax.swing.JPanel {
                     boolean purchased = sqlite.purchaseProduct(productName, quantity);
                     if (!purchased) {
                         sqlite.addLogs(
-                            "PURCHASE_FAILED",
+                            "PURCHASE_FAILURE",
                             frame.sessionUser.getUsername(),
                             "Product out of stock or insufficient quantity",
                             LocalDateTime.now().format(TS_FMT)
@@ -248,6 +254,13 @@ public class MgmtProduct extends javax.swing.JPanel {
     private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
         try {
             if (!canManageProducts()) {
+                sqlite.addLogs(
+                    "ACCESS_DENIED",
+                    frame.sessionUser.getUsername(),
+                    "Attempted to manage product without staff and manager privileges",
+                    LocalDateTime.now().format(TS_FMT)
+                );
+
                 JOptionPane.showMessageDialog(this, "Only staff and managers can manage products.", "Access Denied", JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -311,6 +324,13 @@ public class MgmtProduct extends javax.swing.JPanel {
     private void editBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editBtnActionPerformed
         try {
             if (!canManageProducts()) {
+                sqlite.addLogs(
+                    "ACCESS_DENIED",
+                    frame.sessionUser.getUsername(),
+                    "Attempted to manage product without staff and manager privileges",
+                    LocalDateTime.now().format(TS_FMT)
+                );
+
                 JOptionPane.showMessageDialog(this, "Only staff and managers can manage products.", "Access Denied", JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -374,6 +394,12 @@ public class MgmtProduct extends javax.swing.JPanel {
     private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
         try {
             if (!canManageProducts()) {
+                sqlite.addLogs(
+                    "ACCESS_DENIED",
+                    frame.sessionUser.getUsername(),
+                    "Attempted to manage product without staff and manager privileges",
+                    LocalDateTime.now().format(TS_FMT)
+                );
                 JOptionPane.showMessageDialog(this, "Only staff and managers can manage products.", "Access Denied", JOptionPane.ERROR_MESSAGE);
                 return;
             }

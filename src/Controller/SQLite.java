@@ -221,10 +221,12 @@ public class SQLite {
 
             // WARNINGS
             case "VALIDATION_FAILURE":
+            case "AUTHENTICATION_FAILURE":
+            case "AUTHORIZATION_FAILURE":
             case "ACCOUNT_LOCKED":
             case "LOGIN_FAILURE":
-            case "LOGIN_FAILED":
-            case "PURCHASE_FAILED":
+            case "PURCHASE_FAILURE":
+            case "ACCESS_DENIED":
                 level = "WARNING";
                 break;
 
