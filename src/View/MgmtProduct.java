@@ -207,11 +207,6 @@ public class MgmtProduct extends javax.swing.JPanel {
                     try {
                         quantity = Integer.parseInt(purchaseStr);
                         if (quantity <= 0) {
-                            sqlite.addLogs("VALIDATION_FAILURE",
-                                    frame.sessionUser.getUsername(),
-                                    "PURCHASE failed: quantity <= 0 (" + quantity + ")",
-                                    LocalDateTime.now().format(TS_FMT));
-
                             throw new NumberFormatException();
                         }
                     } catch (NumberFormatException e) {
@@ -290,11 +285,6 @@ public class MgmtProduct extends javax.swing.JPanel {
                     stock = Integer.parseInt(stockStr);
                     price = Double.parseDouble(priceStr);
                     if (stock < 0 || price < 0) {
-                        sqlite.addLogs("VALIDATION_FAILURE",
-                                frame.sessionUser.getUsername(),
-                                "Negative values rejected: stock=" + stock + ", price=" + price,
-                                LocalDateTime.now().format(TS_FMT));
-
                         throw new NumberFormatException();
                     }
                 } catch (NumberFormatException e) {
